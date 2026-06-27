@@ -1,13 +1,13 @@
 from dishka import Provider, Scope, provide
 
-from application.services.auth import RegisterUserService, LoginUserService
+from application.services.auth import LoginUserService, RegisterUserService
 
 
 class ApplicationProvider(Provider):
     register_user_service = provide(
-        RegisterUserService, scope=Scope.REQUEST
+        RegisterUserService, scope=Scope.REQUEST,
     )
 
     login_user_service = provide(
-        LoginUserService, scope=Scope.REQUEST
+        LoginUserService, scope=Scope.REQUEST,
     )
