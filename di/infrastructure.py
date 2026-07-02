@@ -1,14 +1,17 @@
 from collections.abc import AsyncIterable
-from dishka import Provider, Scope, AnyOf, provide
-from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 
-from core.config import Config
-from infrastructure.resources.database import new_session_maker
-from infrastructure.repositories.user import UserRepository
-from infrastructure.security import JWTToken, Argon2PwdHasher, SHA256Hasher
-from application.interfaces.user import IUserReader, IUserSaver
-from application.interfaces.security import IJWTToken, IPwdHasher, IHasher
+from dishka import AnyOf, Provider, Scope, provide
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
+from application.interfaces.localization import ITranslator
+from application.interfaces.security import IHasher, IJWTToken, IPwdHasher
 from application.interfaces.transaction import TransactionManager
+from application.interfaces.user import IUserReader, IUserSaver
+from core.config import Config
+from infrastructure.localization import Translator
+from infrastructure.repositories.user import UserRepository
+from infrastructure.resources.database import new_session_maker
+from infrastructure.security import Argon2PwdHasher, JWTToken, SHA256Hasher
 
 
 class InfrastructureProvider(Provider):
@@ -18,7 +21,7 @@ class InfrastructureProvider(Provider):
 
     @provide(scope=Scope.REQUEST)
     async def session(
-            self, session_maker: async_sessionmaker[AsyncSession]
+        self, session_maker: async_sessionmaker[AsyncSession]
     ) -> AsyncIterable[AnyOf[AsyncSession, TransactionManager]]:
         async with session_maker() as session:
             try:
@@ -32,20 +35,14 @@ class InfrastructureProvider(Provider):
         provides=AnyOf[IUserReader, IUserSaver],
     )
 
-    jwt_token = provide(
-        JWTToken,
-        scope=Scope.APP,
-        provides=IJWTToken
-    )
+    jwt_token = provide(JWTToken, scope=Scope.APP, provides=IJWTToken)
 
-    pwd_hasher = provide(
-        Argon2PwdHasher,
-        scope=Scope.APP,
-        provides=IPwdHasher
-    )
+    pwd_hasher = provide(Argon2PwdHasher, scope=Scope.APP, provides=IPwdHasher)
 
     sha256_hasher = provide(
         SHA256Hasher,
         scope=Scope.APP,
         provides=IHasher,
     )
+
+    translator = provide(Translator, scope=Scope.APP, provides=ITranslator)

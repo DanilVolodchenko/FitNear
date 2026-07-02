@@ -1,13 +1,14 @@
 import asyncio
 import hmac
-from typing import Any, Sequence
+from collections.abc import Sequence
 from hashlib import sha256
+from typing import Any
 
 import jwt
 from argon2 import PasswordHasher
 from argon2.exceptions import Argon2Error, InvalidHashError
 
-from application.interfaces.security import IJWTToken, IPwdHasher, IHasher
+from application.interfaces.security import IHasher, IJWTToken, IPwdHasher
 
 
 class JWTToken(IJWTToken):
@@ -28,7 +29,7 @@ class Argon2PwdHasher(IPwdHasher):
     async def verify(self, hash_password: str, password: str) -> bool:
         try:
             await asyncio.to_thread(self.ph.verify, hash=password, password=password)
-        except (InvalidHashError, Argon2Error):
+        except InvalidHashError, Argon2Error:
             return False
         return True
 
