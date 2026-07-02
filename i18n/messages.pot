@@ -18,5 +18,11 @@ msgstr ""
 "Generated-By: Babel 2.18.0\n"
 
 #: FitNear
-msgid "User Not Found"
+msgid "User Not Found."
+msgstr ""
+
+msgid "User already exists"
+msgstr ""
+
+msgid "Internal Server Error"
 msgstr ""

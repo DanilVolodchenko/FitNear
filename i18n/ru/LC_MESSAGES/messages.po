@@ -22,3 +22,9 @@ msgstr ""
 #: FitNear
 msgid "User Not Found"
 msgstr "Пользователь не найден"
+
+msgid "User already exists"
+msgstr "Такой пользователь уже существует"
+
+msgid "Internal Server Error"
+msgstr "Внутренняя ошибка сервера"
