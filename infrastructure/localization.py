@@ -7,7 +7,7 @@ from core.config_path import I18N_PATH
 
 
 class Translator(ITranslator):
-    def translate(self, text: str, lang: str) -> str:
+    def translate(self, text: str, *, lang: str) -> str:
         translation = gettext.translation('messages', I18N_PATH, languages=[lang], fallback=True)
 
         return translation.gettext(text)
