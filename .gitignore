@@ -12,5 +12,6 @@ wheels/
 # idea
 .idea
 .vscode
+.zed
 
 .env
