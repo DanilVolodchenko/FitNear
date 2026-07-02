@@ -26,11 +26,11 @@ roles_permissions = Table(
 
 class User(Base):
     email: Mapped[str] = mapped_column(unique=True, nullable=False)
-    username: Mapped[str] = mapped_column(unique=True, nullable=False)
     name: Mapped[str]
     password: Mapped[str]
+    is_confirmed: Mapped[bool] = mapped_column(default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime | None] = mapped_column(default=None)
 
     roles: Mapped[list[Role]] = relationship(secondary=users_roles, back_populates='users')
     permissions: Mapped[list[Permission]] = relationship(secondary=users_roles, back_populates='users')
