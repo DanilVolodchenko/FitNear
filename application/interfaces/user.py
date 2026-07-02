@@ -6,11 +6,11 @@ from domain.entities.user import UserDM
 
 class IUserReader(abc.ABC):
     @abc.abstractmethod
-    async def get_by_username(self, username: str) -> UserDM | None:
-        """Returns user by username."""
+    async def get_by_email(self, email: str) -> UserDM | None:
+        """Returns user by email."""
 
 
 class IUserSaver(abc.ABC):
     @abc.abstractmethod
-    async def create(self, user: CreateUserDTO) -> None:
+    async def create(self, user: CreateUserDTO) -> int:
         """Create new user."""
