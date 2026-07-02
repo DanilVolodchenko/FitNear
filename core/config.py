@@ -1,14 +1,12 @@
-from typing import Literal
+from typing import Any, Literal
 
 from dotenv import dotenv_values
 from pydantic import BaseModel, Field
 from sqlalchemy import URL
-from os import environ
+
 from core.config_path import ENV_PATH
 
-env = dotenv_values(ENV_PATH)
-
-print(environ)
+env: dict[str, Any] = dotenv_values(ENV_PATH)
 
 
 class FastApiConfig(BaseModel):
