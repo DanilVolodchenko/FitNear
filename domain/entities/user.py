@@ -1,12 +1,16 @@
+from datetime import datetime
 from dataclasses import dataclass
 
 
 @dataclass(slots=True)
 class UserDM:
     id: int | None
+    email: str
     name: str
-    username: str
     password: str
+    is_comfirmed: bool
+    created_at: datetime
+    updated_at: datetime | None
 
 
 @dataclass(slots=True)

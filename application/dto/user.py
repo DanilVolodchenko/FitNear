@@ -9,6 +9,7 @@ class GetUserDTO:
 
 @dataclass
 class CreateUserDTO:
-    username: str
+    email: str
     name: str
     password: str
+    is_confirmed: bool = False
