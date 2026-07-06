@@ -16,7 +16,7 @@ class IRegistrationTokenSaver(abc.ABC):
         """Create registration token."""
 
 
-class IRegistrationTokenDeactivator(abc.ABC):
+class IRegistrationTokenUpdater(abc.ABC):
     @abc.abstractmethod
     async def deactivate_by_user(self, user_id: int) -> None:
         """Deactivate all token by user_id."""
