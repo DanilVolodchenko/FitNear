@@ -4,14 +4,20 @@ from dishka import AnyOf, Provider, Scope, provide
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from application.interfaces.localization import ITranslator
-from application.interfaces.security import IHasher, IJWTToken, IPwdHasher
+from application.interfaces.security import IHasher, IJWTToken, IPwdHasher, ITokenGenerator
+from application.interfaces.token import (
+    IRegistrationTokenReader,
+    IRegistrationTokenSaver,
+    IRegistrationTokenUpdater,
+)
 from application.interfaces.transaction import TransactionManager
 from application.interfaces.user import IUserReader, IUserSaver
 from core.config import Config
 from infrastructure.localization import Translator
+from infrastructure.repositories.token import RegistrationTokenRepository
 from infrastructure.repositories.user import UserRepository
 from infrastructure.resources.database import new_session_maker
-from infrastructure.security import Argon2PwdHasher, JWTToken, SHA256Hasher
+from infrastructure.security import Argon2PwdHasher, JWTToken, RandomTokenGenerator, SHA256Hasher
 
 
 class InfrastructureProvider(Provider):
@@ -26,13 +32,19 @@ class InfrastructureProvider(Provider):
         async with session_maker() as session:
             try:
                 yield session
-            except Exception:
+            except Exception:  # noqa: BLE001
                 await session.rollback()
 
     user_repository = provide(
         UserRepository,
         scope=Scope.REQUEST,
         provides=AnyOf[IUserReader, IUserSaver],
+    )
+
+    registration_token_repository = provide(
+        RegistrationTokenRepository,
+        scope=Scope.REQUEST,
+        provides=AnyOf[IRegistrationTokenReader, IRegistrationTokenSaver, IRegistrationTokenUpdater],
     )
 
     jwt_token = provide(JWTToken, scope=Scope.APP, provides=IJWTToken)
@@ -46,3 +58,4 @@ class InfrastructureProvider(Provider):
     )
 
     translator = provide(Translator, scope=Scope.APP, provides=ITranslator)
+    random_token_generator = provide(RandomTokenGenerator, scope=Scope.APP, provides=ITokenGenerator)
