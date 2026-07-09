@@ -1,9 +1,9 @@
-"""empty message
+"""
+empty message
 
 Revision ID: 4026db55f82d
 Revises:
 Create Date: 2026-07-01 18:47:27.961598
-
 """
 
 from collections.abc import Sequence
