@@ -12,5 +12,11 @@ class IUserReader(abc.ABC):
 
 class IUserSaver(abc.ABC):
     @abc.abstractmethod
-    async def create(self, user: CreateUserDTO) -> int:
+    async def create(self, user: CreateUserDTO) -> UserDM:
         """Create new user."""
+
+
+class IUserEmailConfirmer(abc.ABC):
+    @abc.abstractmethod
+    async def send(self, url: str, title: str, description: str) -> None:
+        """Send user info to confirm user email."""
