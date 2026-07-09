@@ -1,11 +1,9 @@
-import profile
 from enum import StrEnum
-from typing import Any, Literal
+from typing import Any, Self
 
 from dotenv import dotenv_values
 from pydantic import BaseModel, Field, model_validator
 from sqlalchemy import URL
-from typing_extensions import Self
 
 from core.config_path import ENV_PATH
 

@@ -27,7 +27,8 @@ class InfrastructureProvider(Provider):
 
     @provide(scope=Scope.REQUEST)
     async def session(
-        self, session_maker: async_sessionmaker[AsyncSession]
+        self,
+        session_maker: async_sessionmaker[AsyncSession],
     ) -> AsyncIterable[AnyOf[AsyncSession, TransactionManager]]:
         async with session_maker() as session:
             try:
