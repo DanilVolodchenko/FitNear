@@ -1,14 +1,14 @@
-from datetime import datetime
 from dataclasses import dataclass
+from datetime import datetime
 
 
 @dataclass(slots=True)
 class UserDM:
-    id: int | None
+    id: int
     email: str
     name: str
     password: str
-    is_comfirmed: bool
+    is_confirmed: bool
     created_at: datetime
     updated_at: datetime | None
 
