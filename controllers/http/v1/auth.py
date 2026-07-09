@@ -22,8 +22,10 @@ async def register(
         name=user.name,
         password=user.password,
     )
-    await register_user(request, user_dto)
+    res = await register_user(request, user_dto)
     await trx_manager.commit()
+
+    return res
 
 
 @router.post(
