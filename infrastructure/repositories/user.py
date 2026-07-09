@@ -1,9 +1,10 @@
 from sqlalchemy.ext.asyncio.session import AsyncSession
-from sqlalchemy.sql import text
+from sqlalchemy.sql import select, text
 
 from application.dto.user import CreateUserDTO
 from application.interfaces.user import IUserReader, IUserSaver
 from domain.entities.user import UserDM
+from infrastructure.models.user import User
 
 
 class UserRepository(IUserReader, IUserSaver):
@@ -17,27 +18,27 @@ class UserRepository(IUserReader, IUserSaver):
             statement=stmt,
             params={'email': email},
         )
-        row = result.fetchone()
+        entity = result.mappings().one_or_none()
 
-        if not row:
+        if not entity:
             return None
 
         return UserDM(
-            id=row.id,
-            email=row.email,
-            name=row.name,
-            password=row.password,
-            is_comfirmed=row.is_confirmed,
-            created_at=row.created_at,
-            updated_at=row.updated_at,
+            id=entity.id,
+            email=entity.email,
+            name=entity.name,
+            password=entity.password,
+            is_confirmed=entity.is_confirmed,
+            created_at=entity.created_at,
+            updated_at=entity.updated_at,
         )
 
-    async def create(self, user: CreateUserDTO) -> int:
+    async def create(self, user: CreateUserDTO) -> UserDM:
         stmt = text(
             """
             INSERT INTO users (email, name, password, is_confirmed)
             VALUES (:email, :name, :password, :is_confirmed)
-            RETURNING id;
+            RETURNING *;
             """
         )
 
@@ -51,6 +52,14 @@ class UserRepository(IUserReader, IUserSaver):
             },
         )
 
-        user_id: int = result.scalar_one()
+        entity = result.mappings().one()
 
-        return user_id
+        return UserDM(
+            id=entity.id,
+            email=entity.email,
+            name=entity.name,
+            password=entity.password,
+            is_confirmed=entity.is_confirmed,
+            created_at=entity.created_at,
+            updated_at=entity.updated_at,
+        )
