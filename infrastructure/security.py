@@ -1,5 +1,6 @@
 import asyncio
 import hmac
+import secrets
 from collections.abc import Sequence
 from hashlib import sha256
 from typing import Any
@@ -8,7 +9,7 @@ import jwt
 from argon2 import PasswordHasher
 from argon2.exceptions import Argon2Error, InvalidHashError
 
-from application.interfaces.security import IHasher, IJWTToken, IPwdHasher
+from application.interfaces.security import IHasher, IJWTToken, IPwdHasher, ITokenGenerator
 
 
 class JWTToken(IJWTToken):
@@ -38,10 +39,17 @@ class Argon2PwdHasher(IPwdHasher):
 
 
 class SHA256Hasher(IHasher):
-    async def hash(self, msg: str, key: str) -> str | bytes:
+    async def hash(self, msg: str, key: str) -> str:
         return hmac.new(
-            key=key.encode(encoding='utf-8'), msg=msg.encode(encoding='utf-8'), digestmod=sha256
+            key=key.encode(encoding='utf-8'),
+            msg=msg.encode(encoding='utf-8'),
+            digestmod=sha256,
         ).hexdigest()
 
     async def compare(self, hash_msg_1: str | bytes, hash_msg_2: str | bytes) -> bool:
         return hmac.compare_digest(hash_msg_1, hash_msg_2)
+
+
+class RandomTokenGenerator(ITokenGenerator):
+    async def __call__(self, bytes_count: int) -> str:
+        return await asyncio.to_thread(secrets.token_urlsafe, bytes_count)
