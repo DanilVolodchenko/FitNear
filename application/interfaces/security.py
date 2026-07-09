@@ -1,5 +1,6 @@
 import abc
-from typing import Any, Sequence, Literal
+from collections.abc import Sequence
+from typing import Any
 
 
 class IJWTToken(abc.ABC):
@@ -14,7 +15,7 @@ class IJWTToken(abc.ABC):
 
 class IHasher(abc.ABC):
     @abc.abstractmethod
-    async def hash(self, msg: str, key: str) -> str | bytes:
+    async def hash(self, msg: str, key: str) -> str:
         """Hash msg using key."""
 
     @abc.abstractmethod
@@ -34,3 +35,9 @@ class IPwdHasher(abc.ABC):
     @abc.abstractmethod
     async def check_needs_rehash(self, pwd_hash: str) -> bool:
         """Check need to rehash hash or not."""
+
+
+class ITokenGenerator(abc.ABC):
+    @abc.abstractmethod
+    async def __call__(self, bytes_count: int) -> str:
+        """Generage token."""
