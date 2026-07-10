@@ -3,21 +3,27 @@ from collections.abc import AsyncIterable
 from dishka import AnyOf, Provider, Scope, provide
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from application.interfaces.generator import IStringGenerator
 from application.interfaces.localization import ITranslator
-from application.interfaces.security import IHasher, IJWTToken, IPwdHasher, ITokenGenerator
-from application.interfaces.token import (
+from application.interfaces.security import IHasher, IJWTToken, IPwdHasher
+from application.interfaces.template import IHTMLTemplate
+from application.interfaces.repositories import  (
+    IUserReader,
+    IUserRemover,
+    IUserSaver,
     IRegistrationTokenReader,
     IRegistrationTokenSaver,
-    IRegistrationTokenUpdater,
+    IRegistrationTokenUpdater
 )
-from application.interfaces.transaction import TransactionManager
-from application.interfaces.user import IUserReader, IUserSaver
+from application.interfaces.transaction import ITransactionManager
 from core.config import Config
+from infrastructure.generator import RandomStringGenerator
 from infrastructure.localization import Translator
 from infrastructure.repositories.token import RegistrationTokenRepository
 from infrastructure.repositories.user import UserRepository
 from infrastructure.resources.database import new_session_maker
-from infrastructure.security import Argon2PwdHasher, JWTToken, RandomTokenGenerator, SHA256Hasher
+from infrastructure.security import Argon2PwdHasher, JWTToken, SHA256Hasher
+from infrastructure.template import HTMLTemplate
 
 
 class InfrastructureProvider(Provider):
@@ -29,17 +35,17 @@ class InfrastructureProvider(Provider):
     async def session(
         self,
         session_maker: async_sessionmaker[AsyncSession],
-    ) -> AsyncIterable[AnyOf[AsyncSession, TransactionManager]]:
+    ) -> AsyncIterable[AnyOf[AsyncSession, ITransactionManager]]:
         async with session_maker() as session:
             try:
                 yield session
-            except Exception:  # noqa: BLE001
+            except Exception:  # ruff: ignore[blind-except]
                 await session.rollback()
 
     user_repository = provide(
         UserRepository,
         scope=Scope.REQUEST,
-        provides=AnyOf[IUserReader, IUserSaver],
+        provides=AnyOf[IUserReader, IUserSaver, IUserRemover],
     )
 
     registration_token_repository = provide(
@@ -52,11 +58,10 @@ class InfrastructureProvider(Provider):
 
     pwd_hasher = provide(Argon2PwdHasher, scope=Scope.APP, provides=IPwdHasher)
 
-    sha256_hasher = provide(
-        SHA256Hasher,
-        scope=Scope.APP,
-        provides=IHasher,
-    )
+    sha256_hasher = provide(SHA256Hasher, scope=Scope.APP, provides=IHasher)
 
     translator = provide(Translator, scope=Scope.APP, provides=ITranslator)
-    random_token_generator = provide(RandomTokenGenerator, scope=Scope.APP, provides=ITokenGenerator)
+
+    random_string_generator = provide(RandomStringGenerator, scope=Scope.APP, provides=IStringGenerator)
+
+    html_template = provide(HTMLTemplate, scope=Scope.APP, provides=IHTMLTemplate)
