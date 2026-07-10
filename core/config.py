@@ -18,7 +18,7 @@ class ServerMode(StrEnum):
 
 class FastApiConfig(BaseModel):
     title: str = Field('FitNear', alias='FASTAPI_TITLE')
-    description: str = Field('CRM Service', alias='FASTAPI_DESCRIPTION')
+    description: str = Field('FN Service', alias='FASTAPI_DESCRIPTION')
     openapi_url: str | None = Field('/openapi.json', alias='FASTAPI_OPENAPI_URL')
     docs_url: str = Field('/api/docs', alias='FASTAPI_DOCS_URL')
     redoc_url: str = Field('/api/redoc', alias='FASTAPI_REDOC_URL')
