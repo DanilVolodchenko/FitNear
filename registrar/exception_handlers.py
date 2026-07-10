@@ -5,11 +5,11 @@ from fastapi.responses import JSONResponse
 from loguru import logger
 
 from di import ioc
-from infrastructure.localization import Translator, ITranslator
+from infrastructure.localization import ITranslator
 from infrastructure.utils.converter import get_language
 
 
-def register_exception_handlers(app: FastAPI) -> None:
+def register_fastapi_exception_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(Exception)
     async def unexpected_exc_handler(request: Request, exc: Exception) -> JSONResponse:
