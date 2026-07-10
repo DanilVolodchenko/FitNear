@@ -8,7 +8,7 @@ from infrastructure.models.base import Base
 
 
 class RegistrationToken(Base):
-    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'))
     token_hash: Mapped[str] = mapped_column(index=True)
     used_at: Mapped[datetime | None] = mapped_column(default=None, nullable=True)
     type: Mapped[RegistrationTokenType]
