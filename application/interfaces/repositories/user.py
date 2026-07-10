@@ -16,7 +16,7 @@ class IUserSaver(abc.ABC):
         """Create new user."""
 
 
-class IUserEmailConfirmer(abc.ABC):
+class IUserRemover(abc.ABC):
     @abc.abstractmethod
-    async def send(self, url: str, title: str, description: str) -> None:
-        """Send user info to confirm user email."""
+    async def remove_by_email(self, email: str) -> None:
+        """Remove user by email."""
