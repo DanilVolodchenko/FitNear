@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from domain.value_objects.token_type import AuthTokenType, RegistrationTokenType
+from application.domain.value_objects.token_type import AuthTokenType, RegistrationTokenType
 
 
 @dataclass(slots=True)

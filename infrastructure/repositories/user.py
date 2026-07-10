@@ -1,10 +1,9 @@
 from sqlalchemy.ext.asyncio.session import AsyncSession
-from sqlalchemy.sql import select, text
+from sqlalchemy.sql import text
 
+from application.domain.entities.user import UserDM
 from application.dto.user import CreateUserDTO
 from application.interfaces.user import IUserReader, IUserSaver
-from domain.entities.user import UserDM
-from infrastructure.models.user import User
 
 
 class UserRepository(IUserReader, IUserSaver):
@@ -39,7 +38,7 @@ class UserRepository(IUserReader, IUserSaver):
             INSERT INTO users (email, name, password, is_confirmed)
             VALUES (:email, :name, :password, :is_confirmed)
             RETURNING *;
-            """
+            """  # ruff: ignore[missing-trailing-comma]
         )
 
         result = await self._session.execute(

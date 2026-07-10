@@ -1,7 +1,7 @@
 import abc
 
+from application.domain.entities.token import RegistrationTokenDM
 from application.dto.token import CreateRegisterTokenDTO
-from domain.entities.token import RegistrationTokenDM
 
 
 class IRegistrationTokenReader(abc.ABC):

@@ -1,13 +1,13 @@
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy.sql import text
 
+from application.domain.entities.token import RegistrationTokenDM
 from application.dto.token import CreateRegisterTokenDTO
 from application.interfaces.token import (
     IRegistrationTokenReader,
     IRegistrationTokenSaver,
     IRegistrationTokenUpdater,
 )
-from domain.entities.token import RegistrationTokenDM
 
 
 class RegistrationTokenRepository(IRegistrationTokenReader, IRegistrationTokenSaver, IRegistrationTokenUpdater):

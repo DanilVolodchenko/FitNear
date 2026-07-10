@@ -3,6 +3,7 @@ from datetime import UTC, datetime, timedelta
 from fastapi import Request, Response
 
 from application.constants import EMAIL_CONFIRMATION_TOKEN_TIME_SEC, RANDOM_BYTES_COUNT
+from application.domain.value_objects.token_type import RegistrationTokenType
 from application.dto.security import JWTTokenDTO
 from application.dto.token import CreateRegisterTokenDTO
 from application.dto.user import CreateUserDTO, GetUserDTO
@@ -17,7 +18,6 @@ from application.interfaces.token import (
 from application.interfaces.transaction import TransactionManager
 from application.interfaces.user import IUserEmailConfirmer, IUserReader, IUserSaver
 from core.config import Config
-from domain.value_objects.token_type import RegistrationTokenType
 from infrastructure.utils.converter import get_language
 
 

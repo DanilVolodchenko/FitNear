@@ -1,7 +1,7 @@
 import abc
 
+from application.domain.entities.user import UserDM
 from application.dto.user import CreateUserDTO
-from domain.entities.user import UserDM
 
 
 class IUserReader(abc.ABC):

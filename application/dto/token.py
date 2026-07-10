@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from domain.entities.token import RegistrationTokenType
+from application.domain.entities.token import RegistrationTokenType
 
 
 @dataclass(slots=True)

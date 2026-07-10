@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column
 
-from domain.value_objects.token_type import AuthTokenType, RegistrationTokenType
+from application.domain.value_objects.token_type import AuthTokenType, RegistrationTokenType
 from infrastructure.models.base import Base
 
 
