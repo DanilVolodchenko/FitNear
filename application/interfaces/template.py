@@ -1,4 +1,7 @@
 import abc
 
 
-class ITemplateGenerator(abc.ABC): ...
+class IHTMLTemplate(abc.ABC):
+    @abc.abstractmethod
+    async def generate(self, **kwargs: str | int) -> str:
+        """Generate templates like HTML etc."""

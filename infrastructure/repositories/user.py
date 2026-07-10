@@ -3,10 +3,10 @@ from sqlalchemy.sql import text
 
 from application.domain.entities.user import UserDM
 from application.dto.user import CreateUserDTO
-from application.interfaces.user import IUserReader, IUserSaver
+from application.interfaces.repositories import IUserReader, IUserRemover, IUserSaver
 
 
-class UserRepository(IUserReader, IUserSaver):
+class UserRepository(IUserReader, IUserSaver, IUserRemover):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
@@ -62,3 +62,8 @@ class UserRepository(IUserReader, IUserSaver):
             created_at=entity.created_at,
             updated_at=entity.updated_at,
         )
+
+    async def remove_by_email(self, email: str) -> None:
+        stmt = text('DELETE FROM users WHERE email = :email')
+
+        await self._session.execute(statement=stmt, params={'email': email})

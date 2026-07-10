@@ -3,7 +3,7 @@ from sqlalchemy.sql import text
 
 from application.domain.entities.token import RegistrationTokenDM
 from application.dto.token import CreateRegisterTokenDTO
-from application.interfaces.token import (
+from application.interfaces.repositories import (
     IRegistrationTokenReader,
     IRegistrationTokenSaver,
     IRegistrationTokenUpdater,

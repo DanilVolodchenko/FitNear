@@ -35,9 +35,3 @@ class IPwdHasher(abc.ABC):
     @abc.abstractmethod
     async def check_needs_rehash(self, pwd_hash: str) -> bool:
         """Check need to rehash hash or not."""
-
-
-class ITokenGenerator(abc.ABC):
-    @abc.abstractmethod
-    async def __call__(self, bytes_count: int) -> str:
-        """Generage token."""
