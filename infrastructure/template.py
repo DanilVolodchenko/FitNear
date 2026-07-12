@@ -1,24 +1,43 @@
 import webbrowser
+from pathlib import Path
 
 import jinja2
 
 from application.interfaces.template import IHTMLTemplate
 from core.config_path import BASE_PATH
 
+CONFIRM_EMAIL_TEMPLATE: str = """
+<html lang="{{ language }}">
+    <head>
+        <title>{{ title }}</title>
+    </head>
+    <body>
+        <div>{{ description }}</div>
+    </body>
+</html>
+"""
+
 
 class HTMLTemplate(IHTMLTemplate):
-    async def generate(self, **kwargs: str | int) -> str:
-        path = BASE_PATH / 'infrastructure'
+    async def generate(self, template_path: Path, **kwargs: str | int) -> str:
 
-        environment = jinja2.Environment(loader=jinja2.FileSystemLoader(BASE_PATH / 'infrastructure'))
-        template = environment.get_template('confirm_email_template.html')
-
-        rend_html = template.render(
-            language='en', title='Test', description='Для подтверждения электронной почты нажмите на кнопку'
+        environment = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(template_path.parent),
+            autoescape=True,
+            enable_async=True,
         )
 
-        output_file = path / 'ready_page.html'
-        with open(output_file, 'w', encoding='utf-8') as f:
-            f.write(rend_html)
+        # template = jinja2.Template(tmpl, enable_async=True)
+        template = environment.get_template('confirm_email.html')
 
-        webbrowser.open(output_file.as_uri())
+        rend_html = await template.render_async(**kwargs)
+        import io
+        import tempfile
+
+        bytes_io_buffer = io.BytesIO(rend_html.encode('utf-8'))
+
+        with tempfile.NamedTemporaryFile(suffix='.html', delete=False) as temp_file:
+            temp_file.write(bytes_io_buffer.getvalue())
+            temp_file_path = temp_file.name
+
+        webbrowser.open(f'file://{temp_file_path}')

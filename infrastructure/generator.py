@@ -1,9 +1,12 @@
 import asyncio
 import secrets
 
-from application.interfaces.generator import IStringGenerator
+from application.interfaces.generator import IRandomGenerator
 
 
-class RandomStringGenerator(IStringGenerator):
-    async def __call__(self, bytes_count: int) -> str:
-        return await asyncio.to_thread(secrets.token_urlsafe, bytes_count)
+class RandomStringGenerator(IRandomGenerator):
+    async def __call__(self, count: int) -> str:
+        return await asyncio.to_thread(secrets.token_urlsafe, count)
+
+
+class RandomNumberGenerator(IRandomGenerator):

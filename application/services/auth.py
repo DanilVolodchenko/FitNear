@@ -9,18 +9,19 @@ from application.dto.user import CreateUserDTO
 from application.errors import FoundError
 from application.interfaces.generator import IStringGenerator
 from application.interfaces.localization import ITranslator
-from application.interfaces.security import IHasher, IPwdHasher
-from application.interfaces.template import IHTMLTemplate
 from application.interfaces.repositories import (
-    IUserReader,
-    IUserRemover,
-    IUserSaver,
     IRegistrationTokenReader,
     IRegistrationTokenSaver,
     IRegistrationTokenUpdater,
+    IUserReader,
+    IUserRemover,
+    IUserSaver,
 )
+from application.interfaces.security import IHasher, IPwdHasher
+from application.interfaces.template import IHTMLTemplate
 from application.interfaces.transaction import ITransactionManager
 from core.config import Config
+from core.config_path import CONFIRM_EMAIL_HTML_PATH
 from infrastructure.utils.converter import get_language
 
 
@@ -87,4 +88,10 @@ class RegisterUserService:
             ),
         )
 
-        await self._html_template.generate()
+        await self._html_template.generate(
+            template_path=CONFIRM_EMAIL_HTML_PATH,
+            language='en',
+            title='Test',
+            description='Для подтверждения электронной почты нажмите на кнопку',
+            link=f'{self._config.server.confirmation_url}?token={registaration_token}',
+        )

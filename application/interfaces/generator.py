@@ -1,7 +1,7 @@
 import abc
 
 
-class IStringGenerator(abc.ABC):
+class IRandomStringGenerator(abc.ABC):
     @abc.abstractmethod
-    async def __call__(self, bytes_count: int) -> str:
-        """Generage string."""
+    async def __call__(self, length: int) -> str:
+        """Generage string with length."""

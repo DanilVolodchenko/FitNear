@@ -5,16 +5,16 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from application.interfaces.generator import IStringGenerator
 from application.interfaces.localization import ITranslator
-from application.interfaces.security import IHasher, IJWTToken, IPwdHasher
-from application.interfaces.template import IHTMLTemplate
-from application.interfaces.repositories import  (
+from application.interfaces.repositories import (
+    IRegistrationTokenReader,
+    IRegistrationTokenSaver,
+    IRegistrationTokenUpdater,
     IUserReader,
     IUserRemover,
     IUserSaver,
-    IRegistrationTokenReader,
-    IRegistrationTokenSaver,
-    IRegistrationTokenUpdater
 )
+from application.interfaces.security import IHasher, IJWTToken, IPwdHasher
+from application.interfaces.template import IHTMLTemplate
 from application.interfaces.transaction import ITransactionManager
 from core.config import Config
 from infrastructure.generator import RandomStringGenerator
