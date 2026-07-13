@@ -3,11 +3,14 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from infrastructure.localization import compile_translations
+from core.config_path import I18N_PATH
+from di import ioc
+from infrastructure.localization import ITranslator
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
-    compile_translations()
+    translator = await ioc.get(ITranslator)
+    translator.compile(I18N_PATH)
 
     yield
