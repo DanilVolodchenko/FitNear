@@ -1,10 +1,10 @@
-"""empty message
+"""
+empty message
 
 Revision ID: 2ce8bbeac8f2
 Revises: 0ee35930b00f
 Create Date: 2026-07-10 13:20:07.465801
-
-"""
+"""  # ruff: ignore[implicit-namespace-package]
 
 from collections.abc import Sequence
 

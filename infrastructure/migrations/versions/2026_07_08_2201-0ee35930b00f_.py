@@ -4,7 +4,7 @@ empty message
 Revision ID: 0ee35930b00f
 Revises: 4026db55f82d
 Create Date: 2026-07-08 22:01:21.394888
-"""
+"""  # ruff: ignore[implicit-namespace-package]
 
 from collections.abc import Sequence
 
@@ -44,7 +44,7 @@ def upgrade() -> None:
         sa.Column('token_hash', sa.String(), nullable=False),
         sa.Column('used_at', sa.DateTime(), nullable=True),
         sa.Column(
-            'type', sa.Enum('EMAIL_CONFIRMATION', 'PASSWORD_RESET', name='registrationtokentype'), nullable=False
+            'type', sa.Enum('EMAIL_CONFIRMATION', 'PASSWORD_RESET', name='registrationtokentype'), nullable=False,
         ),
         sa.Column('active', sa.Boolean(), nullable=False),
         sa.Column('expires_at', sa.DateTime(), nullable=False),
