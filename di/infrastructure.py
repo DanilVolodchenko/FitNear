@@ -1,29 +1,29 @@
 from collections.abc import AsyncIterable
+from typing import cast
 
 from dishka import AnyOf, Provider, Scope, provide
+from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from application.interfaces.generator import IStringGenerator
 from application.interfaces.localization import ITranslator
+from application.interfaces.log import ILogger
 from application.interfaces.repositories import (
     IRegistrationTokenReader,
     IRegistrationTokenSaver,
-    IRegistrationTokenUpdater,
     IUserReader,
     IUserRemover,
     IUserSaver,
 )
 from application.interfaces.security import IHasher, IJWTToken, IPwdHasher
-from application.interfaces.template import IHTMLTemplate
 from application.interfaces.transaction import ITransactionManager
 from core.config import Config
-from infrastructure.generator import RandomStringGenerator
+from infrastructure.generator import StringDigitCodeGenerator
 from infrastructure.localization import Translator
 from infrastructure.repositories.token import RegistrationTokenRepository
 from infrastructure.repositories.user import UserRepository
 from infrastructure.resources.database import new_session_maker
 from infrastructure.security import Argon2PwdHasher, JWTToken, SHA256Hasher
-from infrastructure.template import HTMLTemplate
 
 
 class InfrastructureProvider(Provider):
@@ -42,6 +42,10 @@ class InfrastructureProvider(Provider):
             except Exception:  # ruff: ignore[blind-except]
                 await session.rollback()
 
+    @provide(scope=Scope.APP)
+    def get_logger(self) -> ILogger:
+        return cast(ILogger, logger)
+
     user_repository = provide(
         UserRepository,
         scope=Scope.REQUEST,
@@ -51,7 +55,7 @@ class InfrastructureProvider(Provider):
     registration_token_repository = provide(
         RegistrationTokenRepository,
         scope=Scope.REQUEST,
-        provides=AnyOf[IRegistrationTokenReader, IRegistrationTokenSaver, IRegistrationTokenUpdater],
+        provides=AnyOf[IRegistrationTokenReader, IRegistrationTokenSaver],
     )
 
     jwt_token = provide(JWTToken, scope=Scope.APP, provides=IJWTToken)
@@ -62,6 +66,4 @@ class InfrastructureProvider(Provider):
 
     translator = provide(Translator, scope=Scope.APP, provides=ITranslator)
 
-    random_string_generator = provide(RandomStringGenerator, scope=Scope.APP, provides=IStringGenerator)
-
-    html_template = provide(HTMLTemplate, scope=Scope.APP, provides=IHTMLTemplate)
+    random_string_generator = provide(StringDigitCodeGenerator, scope=Scope.APP, provides=IStringGenerator)
