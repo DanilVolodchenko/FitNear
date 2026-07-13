@@ -1,11 +1,12 @@
-from application.interfaces.repositories.token import IRegistrationTokenReader, IRegistrationTokenSaver, IRegistrationTokenUpdater
-from application.interfaces.repositories.user import IUserReader, IUserSaver, IUserRemover
-
+from application.interfaces.repositories.token import (
+    IRegistrationTokenReader,
+    IRegistrationTokenSaver,
+)
+from application.interfaces.repositories.user import IUserReader, IUserRemover, IUserSaver
 
 __all__ = [
     'IRegistrationTokenReader',
     'IRegistrationTokenSaver',
-    'IRegistrationTokenUpdater',
     'IUserReader',
     'IUserRemover',
     'IUserSaver',

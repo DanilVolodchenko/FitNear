@@ -14,9 +14,3 @@ class IRegistrationTokenSaver(abc.ABC):
     @abc.abstractmethod
     async def create(self, token_dto: CreateRegisterTokenDTO) -> RegistrationTokenDM:
         """Create registration token."""
-
-
-class IRegistrationTokenUpdater(abc.ABC):
-    @abc.abstractmethod
-    async def deactivate_by_user(self, user_id: int) -> None:
-        """Deactivate all token by user_id."""

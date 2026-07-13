@@ -6,11 +6,10 @@ from application.dto.token import CreateRegisterTokenDTO
 from application.interfaces.repositories import (
     IRegistrationTokenReader,
     IRegistrationTokenSaver,
-    IRegistrationTokenUpdater,
 )
 
 
-class RegistrationTokenRepository(IRegistrationTokenReader, IRegistrationTokenSaver, IRegistrationTokenUpdater):
+class RegistrationTokenRepository(IRegistrationTokenReader, IRegistrationTokenSaver):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
@@ -65,8 +64,3 @@ class RegistrationTokenRepository(IRegistrationTokenReader, IRegistrationTokenSa
             expires_at=entity.expires_at,
             created_at=entity.created_at,
         )
-
-    async def deactivate_by_user(self, user_id: int) -> None:
-        stmt = text('UPDATE registration_tokens SET active = false WHERE user_id = :user_id')
-
-        await self._session.execute(statement=stmt, params={'user_id': user_id})
