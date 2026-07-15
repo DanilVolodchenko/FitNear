@@ -5,25 +5,25 @@ from dishka import AnyOf, Provider, Scope, provide
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from application.interfaces.generator import IStringGenerator
-from application.interfaces.localization import ITranslator
-from application.interfaces.log import ILogger
-from application.interfaces.repositories import (
+from config import Config
+from src.core.interfaces.generator import IStringGenerator
+from src.core.interfaces.localization import ITranslator
+from src.core.interfaces.log import ILogger
+from src.core.interfaces.repositories import (
     IRegistrationTokenReader,
     IRegistrationTokenSaver,
     IUserReader,
     IUserRemover,
     IUserSaver,
 )
-from application.interfaces.security import IHasher, IJWTToken, IPwdHasher
-from application.interfaces.transaction import ITransactionManager
-from core.config import Config
-from infrastructure.generator import StringDigitCodeGenerator
-from infrastructure.localization import Translator
-from infrastructure.repositories.token import RegistrationTokenRepository
-from infrastructure.repositories.user import UserRepository
-from infrastructure.resources.database import new_session_maker
-from infrastructure.security import Argon2PwdHasher, JWTToken, SHA256Hasher
+from src.core.interfaces.security import IHasher, IJWTToken, IPwdHasher
+from src.core.interfaces.transaction import ITransactionManager
+from src.infrastructure.generator import StringDigitCodeGenerator
+from src.infrastructure.localization import Translator
+from src.infrastructure.repositories.token import RegistrationTokenRepository
+from src.infrastructure.repositories.user import UserRepository
+from src.infrastructure.resources.database import new_session_maker
+from src.infrastructure.security import Argon2PwdHasher, JWTToken, SHA256Hasher
 
 
 class InfrastructureProvider(Provider):

@@ -3,9 +3,9 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from core.config_path import I18N_PATH
+from config.config_path import I18N_PATH
 from di import ioc
-from infrastructure.localization import ITranslator
+from src.infrastructure.localization import ITranslator
 
 
 @asynccontextmanager

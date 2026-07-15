@@ -3,10 +3,10 @@ from http import HTTPStatus
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from application.errors import ApplicationError
-from application.interfaces.localization import ITranslator
-from application.interfaces.log import ILogger
 from di import ioc
+from src.core.errors import ApplicationError
+from src.core.interfaces.localization import ITranslator
+from src.core.interfaces.log import ILogger
 
 
 def register_fastapi_error_handlers(app: FastAPI) -> None:

@@ -1,6 +1,6 @@
 from dishka import make_async_container
 
-from core.config import Config, config
+from config import Config, config
 from di.application import ApplicationProvider
 from di.infrastructure import InfrastructureProvider
 

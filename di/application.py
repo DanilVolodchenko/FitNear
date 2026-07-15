@@ -1,17 +1,17 @@
 from dishka import Provider, Scope, provide
 
-from application.interfaces.generator import IStringGenerator
-from application.interfaces.localization import ITranslator
-from application.interfaces.repositories import (
+from config import Config
+from src.core.interfaces.generator import IStringGenerator
+from src.core.interfaces.localization import ITranslator
+from src.core.interfaces.repositories import (
     IRegistrationTokenSaver,
     IUserReader,
     IUserRemover,
     IUserSaver,
 )
-from application.interfaces.security import IHasher, IPwdHasher
-from application.interfaces.transaction import ITransactionManager
-from application.services.auth import RegisterUserService
-from core.config import Config
+from src.core.interfaces.security import IHasher, IPwdHasher
+from src.core.interfaces.transaction import ITransactionManager
+from src.core.services.auth import RegisterUserService
 
 
 class ApplicationProvider(Provider):
