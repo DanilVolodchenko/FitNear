@@ -1,10 +1,10 @@
 from logging.config import fileConfig
 
 from alembic import context
-from core.config import config as fn_config
 from sqlalchemy import engine_from_config, pool
 
-from infrastructure.models import Base
+from config import Config
+from src.infrastructure.models import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -12,7 +12,7 @@ config = context.config
 
 config.set_main_option(
     'sqlalchemy.url',
-    fn_config.postgres.uri.render_as_string(hide_password=False),
+    Config().postgres.uri.render_as_string(hide_password=False),
 )
 
 # Interpret the config file for Python logging.

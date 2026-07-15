@@ -1,6 +1,6 @@
 from sqlalchemy.orm import DeclarativeBase, Mapped, declared_attr, mapped_column
 
-from infrastructure.utils.formatter import camel_to_snake
+from src.infrastructure.utils.formatter import camel_to_snake
 
 
 class Base(DeclarativeBase):
