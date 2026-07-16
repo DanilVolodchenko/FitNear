@@ -4,7 +4,7 @@ from datetime import datetime
 from src.core.domain.entities.token import RegistrationTokenType
 
 
-@dataclass(slots=True)
+@dataclass(frozen=True, slots=True)
 class CreateRegisterTokenDTO:
     user_id: int
     token_hash: str

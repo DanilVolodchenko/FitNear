@@ -1,13 +1,13 @@
 from dataclasses import dataclass
 
 
-@dataclass(slots=True)
+@dataclass(frozen=True, slots=True)
 class JWTTokenDTO:
     access_token: str
     refresh_token: str
 
 
-@dataclass(slots=True)
+@dataclass(frozen=True, slots=True)
 class TokenPayload:
     user_id: int
     exp: str
