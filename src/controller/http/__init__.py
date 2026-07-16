@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from src.controllers.http.v1 import v1_router
+from src.controller.http.v1 import v1_router
 
 router = APIRouter()
 

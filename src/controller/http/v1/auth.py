@@ -1,9 +1,9 @@
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
 from fastapi import APIRouter, Request, status
 
-from src.controllers.schemas.user import RegisterUserSchema
+from src.controller.http.v1.schemas.user import RegisterUserSchema
 from src.core.dto.user import CreateUserDTO
-from src.core.services.auth import RegisterUserService
+from src.core.services.user import RegisterUserService
 
 router = APIRouter(prefix='/auth', tags=['Auth'], route_class=DishkaRoute)
 

@@ -11,7 +11,7 @@ from src.core.interfaces.repositories import (
 )
 from src.core.interfaces.security import IHasher, IPwdHasher
 from src.core.interfaces.transaction import ITransactionManager
-from src.core.services.auth import RegisterUserService
+from src.core.services.user import RegisterUserService
 
 
 class ApplicationProvider(Provider):
