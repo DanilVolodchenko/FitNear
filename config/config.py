@@ -76,3 +76,6 @@ class Config(BaseModel):
             self.fastapi.openapi_url = None
 
         return self
+
+
+config = Config()

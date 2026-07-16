@@ -1,9 +1,7 @@
 import uvicorn
 
-from config import Config
+from config import config
 from registrar import register_fastapi_app
-
-config = Config()
 
 app = register_fastapi_app(config.fastapi)
 
