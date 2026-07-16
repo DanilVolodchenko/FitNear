@@ -10,8 +10,10 @@ from src.core.interfaces.generator import IStringGenerator
 from src.core.interfaces.localization import ITranslator
 from src.core.interfaces.log import ILogger
 from src.core.interfaces.repositories import (
+    IRegistrationTokenEditor,
     IRegistrationTokenReader,
     IRegistrationTokenSaver,
+    IUserEditor,
     IUserReader,
     IUserRemover,
     IUserSaver,
@@ -49,13 +51,13 @@ class InfrastructureProvider(Provider):
     user_repository = provide(
         UserRepository,
         scope=Scope.REQUEST,
-        provides=AnyOf[IUserReader, IUserSaver, IUserRemover],
+        provides=AnyOf[IUserReader, IUserSaver, IUserRemover, IUserEditor],
     )
 
     registration_token_repository = provide(
         RegistrationTokenRepository,
         scope=Scope.REQUEST,
-        provides=AnyOf[IRegistrationTokenReader, IRegistrationTokenSaver],
+        provides=AnyOf[IRegistrationTokenReader, IRegistrationTokenSaver, IRegistrationTokenEditor],
     )
 
     jwt_token = provide(JWTToken, scope=Scope.APP, provides=IJWTToken)
