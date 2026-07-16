@@ -3,7 +3,7 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from config import Config
+from config import config as server_config
 from src.infrastructure.models import Base
 
 # this is the Alembic Config object, which provides
@@ -12,7 +12,7 @@ config = context.config
 
 config.set_main_option(
     'sqlalchemy.url',
-    Config().postgres.uri.render_as_string(hide_password=False),
+    server_config.postgres.uri.render_as_string(hide_password=False),
 )
 
 # Interpret the config file for Python logging.
