@@ -2,7 +2,6 @@ from dishka import Provider, Scope, provide
 
 from config import Config
 from src.core.interfaces.generator import IStringGenerator
-from src.core.interfaces.localization import ITranslator
 from src.core.interfaces.repositories import (
     IRegistrationTokenSaver,
     IUserReader,
@@ -19,7 +18,6 @@ class ApplicationProvider(Provider):
     async def get_register_user_service(
         self,
         config: Config,
-        tranlator: ITranslator,
         user_reader: IUserReader,
         user_saver: IUserSaver,
         user_remover: IUserRemover,
@@ -31,7 +29,6 @@ class ApplicationProvider(Provider):
     ) -> RegisterUserService:
         return RegisterUserService(
             config=config,
-            translator=tranlator,
             user_reader=user_reader,
             user_saver=user_saver,
             user_remover=user_remover,
