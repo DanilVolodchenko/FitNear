@@ -16,7 +16,7 @@ from src.core.interfaces.security import IHasher, IPwdHasher
 from src.core.interfaces.transaction import ITransactionManager
 from src.infrastructure.communication import SMTPEmailSender
 from src.infrastructure.generator import StringDigitCodeGenerator
-from src.infrastructure.security import Argon2PwdHasher, JWTToken, SHA256Hasher
+from src.infrastructure.security import Argon2PwdHasher, SHA256Hasher
 
 
 class ApplicationProvider(Provider):
@@ -30,20 +30,19 @@ class ApplicationProvider(Provider):
         reg_token_saver: IRegistrationTokenSaver,
         pwd_hasher: Argon2PwdHasher,
         string_generator: StringDigitCodeGenerator,
-        jwt_token: JWTToken,
         hasher: SHA256Hasher,
         trx_manager: ITransactionManager,
         email_sender: SMTPEmailSender,
     ) -> RegisterUserUseCase:
         return RegisterUserUseCase(
             security_config=config.security,
+            server_cofig=config.server,
             user_reader=user_reader,
             user_saver=user_saver,
             user_remover=user_remover,
             reg_token_saver=reg_token_saver,
             pwd_hasher=pwd_hasher,
             string_generator=string_generator,
-            jwt_token=jwt_token,
             hasher=hasher,
             trx_manager=trx_manager,
             email_sender=email_sender,

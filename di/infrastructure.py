@@ -69,7 +69,9 @@ class InfrastructureProvider(Provider):
 
     translator = provide(Translator, scope=Scope.APP, provides=AnyOf[Translator, ITranslator])
 
-    smtp_email_sender = provide(SMTPEmailSender, scope=Scope.APP, provides=AnyOf[SMTPEmailSender, IEmailSender])
+    @provide(scope=Scope.APP)
+    async def get_smtp_email_sender(self, config: Config) -> SMTPEmailSender:
+        return SMTPEmailSender(smtp_config=config.smtp)
 
     random_string_generator = provide(
         StringDigitCodeGenerator,
