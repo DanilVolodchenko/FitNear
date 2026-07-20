@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from datetime import datetime
 
+from src.core.components.user.domain.value_object import RegistrationTokenType
+
 
 @dataclass(slots=True)
 class UserDM:
@@ -23,3 +25,14 @@ class RoleDM:
 class PermissionDM:
     name: str
     description: str | None
+
+
+@dataclass(slots=True)
+class RegistrationTokenDM:
+    id: int
+    user_id: int
+    token_hash: str
+    type: RegistrationTokenType
+    active: bool
+    expires_at: datetime
+    created_at: datetime

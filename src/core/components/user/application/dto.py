@@ -1,4 +1,7 @@
 from dataclasses import dataclass
+from datetime import datetime
+
+from src.core.components.user.domain.value_object import RegistrationTokenType
 
 
 @dataclass(frozen=True, slots=True)
@@ -18,3 +21,12 @@ class CreateUserDTO:
 @dataclass(frozen=True, slots=True)
 class ConfirmUserDTO:
     confirmation_code: str
+
+
+@dataclass(frozen=True, slots=True)
+class CreateRegisterTokenDTO:
+    user_id: int
+    token_hash: str
+    type: RegistrationTokenType
+    expires_at: datetime
+    active: bool = True

@@ -3,8 +3,8 @@ from datetime import datetime
 from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.core.domain.value_objects.token_type import AuthTokenType, RegistrationTokenType
 from src.infrastructure.models.base import Base
+from src.infrastructure.models.choises import AuthTokenType, RegistrationTokenType
 
 
 class RegistrationToken(Base):

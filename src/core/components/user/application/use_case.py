@@ -1,14 +1,12 @@
 from datetime import UTC, datetime, timedelta
 
-from config import Config
-from src.core.constants import EMAIL_CONFIRMATION_CODE_LENGTH, EMAIL_CONFIRMATION_TOKEN_TIME_SEC
-from src.core.domain.entities.user import UserDM
-from src.core.domain.value_objects.token_type import RegistrationTokenType
-from src.core.dto.token import CreateRegisterTokenDTO
-from src.core.dto.user import ConfirmUserDTO, CreateUserDTO
-from src.core.errors import FoundError
-from src.core.interfaces.generator import IStringGenerator
-from src.core.interfaces.repositories import (
+from config import Config, SecurityConfig
+from src.core.components.user.application.constants import (
+    EMAIL_CONFIRMATION_CODE_LENGTH,
+    EMAIL_CONFIRMATION_TOKEN_TIME_SEC,
+)
+from src.core.components.user.application.dto import ConfirmUserDTO, CreateRegisterTokenDTO, CreateUserDTO
+from src.core.components.user.application.interface import (
     IRegistrationTokenEditor,
     IRegistrationTokenReader,
     IRegistrationTokenSaver,
@@ -17,14 +15,18 @@ from src.core.interfaces.repositories import (
     IUserRemover,
     IUserSaver,
 )
+from src.core.components.user.domain.entity import UserDM
+from src.core.components.user.domain.value_object import RegistrationTokenType
+from src.core.errors import FoundError
+from src.core.interfaces.generator import IStringGenerator
 from src.core.interfaces.security import IHasher, IPwdHasher
 from src.core.interfaces.transaction import ITransactionManager
 
 
-class RegisterUserService:
+class RegisterUserUseCase:
     def __init__(
         self,
-        config: Config,
+        security_config: SecurityConfig,
         user_reader: IUserReader,
         user_saver: IUserSaver,
         user_remover: IUserRemover,
@@ -34,7 +36,7 @@ class RegisterUserService:
         hasher: IHasher,
         trx_manager: ITransactionManager,
     ) -> None:
-        self._config = config
+        self._security_config = security_config
         self._user_reader = user_reader
         self._user_saver = user_saver
         self._user_remover = user_remover
@@ -64,7 +66,7 @@ class RegisterUserService:
         ))
 
         registaration_code = await self._string_generator(EMAIL_CONFIRMATION_CODE_LENGTH)
-        token_hash = await self._hasher.hash(registaration_code, self._config.security.hash_key)
+        token_hash = await self._hasher.hash(registaration_code, self._security_config.hash_key)
 
         expires_at = datetime.now(tz=UTC) + timedelta(seconds=EMAIL_CONFIRMATION_TOKEN_TIME_SEC)
 
@@ -82,7 +84,7 @@ class RegisterUserService:
         return user_dm
 
 
-class ConfirmUserService:
+class ConfirmUseUseCase:
     def __init__(
         self,
         config: Config,

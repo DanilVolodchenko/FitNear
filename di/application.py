@@ -1,8 +1,7 @@
 from dishka import Provider, Scope, provide
 
 from config import Config
-from src.core.interfaces.generator import IStringGenerator
-from src.core.interfaces.repositories import (
+from src.core.components.user.application.interface import (
     IRegistrationTokenEditor,
     IRegistrationTokenReader,
     IRegistrationTokenSaver,
@@ -11,27 +10,30 @@ from src.core.interfaces.repositories import (
     IUserRemover,
     IUserSaver,
 )
+from src.core.components.user.application.use_case import ConfirmUseUseCase, RegisterUserUseCase
+from src.core.interfaces.generator import IStringGenerator
 from src.core.interfaces.security import IHasher, IPwdHasher
 from src.core.interfaces.transaction import ITransactionManager
-from src.core.services.user import ConfirmUserService, RegisterUserService
+from src.infrastructure.generator import StringDigitCodeGenerator
+from src.infrastructure.security import Argon2PwdHasher, SHA256Hasher
 
 
 class ApplicationProvider(Provider):
     @provide(scope=Scope.REQUEST)
-    async def get_register_user_service(
+    async def get_register_user_use_case(
         self,
         config: Config,
         user_reader: IUserReader,
         user_saver: IUserSaver,
         user_remover: IUserRemover,
         reg_token_saver: IRegistrationTokenSaver,
-        pwd_hasher: IPwdHasher,
-        string_generator: IStringGenerator,
-        hasher: IHasher,
+        pwd_hasher: Argon2PwdHasher,
+        string_generator: StringDigitCodeGenerator,
+        hasher: SHA256Hasher,
         trx_manager: ITransactionManager,
-    ) -> RegisterUserService:
-        return RegisterUserService(
-            config=config,
+    ) -> RegisterUserUseCase:
+        return RegisterUserUseCase(
+            security_config=config.security,
             user_reader=user_reader,
             user_saver=user_saver,
             user_remover=user_remover,
@@ -43,7 +45,7 @@ class ApplicationProvider(Provider):
         )
 
     @provide(scope=Scope.REQUEST)
-    async def get_confirm_user_service(
+    async def get_confirm_user_use_case(
         self,
         config: Config,
         user_reader: IUserReader,
@@ -55,8 +57,8 @@ class ApplicationProvider(Provider):
         string_generator: IStringGenerator,
         hasher: IHasher,
         trx_manager: ITransactionManager,
-    ) -> ConfirmUserService:
-        return ConfirmUserService(
+    ) -> ConfirmUseUseCase:
+        return ConfirmUseUseCase(
             config=config,
             user_reader=user_reader,
             user_editor=user_editor,
@@ -65,5 +67,3 @@ class ApplicationProvider(Provider):
             hasher=hasher,
             trx_manager=trx_manager,
         )
-
-    register_user_service = provide(RegisterUserService, scope=Scope.REQUEST)

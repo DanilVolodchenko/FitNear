@@ -6,10 +6,7 @@ from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from config import Config
-from src.core.interfaces.generator import IStringGenerator
-from src.core.interfaces.localization import ITranslator
-from src.core.interfaces.log import ILogger
-from src.core.interfaces.repositories import (
+from src.core.components.user.application.interface import (
     IRegistrationTokenEditor,
     IRegistrationTokenReader,
     IRegistrationTokenSaver,
@@ -18,12 +15,14 @@ from src.core.interfaces.repositories import (
     IUserRemover,
     IUserSaver,
 )
+from src.core.interfaces.generator import IStringGenerator
+from src.core.interfaces.localization import ITranslator
+from src.core.interfaces.log import ILogger
 from src.core.interfaces.security import IHasher, IJWTToken, IPwdHasher
 from src.core.interfaces.transaction import ITransactionManager
 from src.infrastructure.generator import StringDigitCodeGenerator
 from src.infrastructure.localization import Translator
-from src.infrastructure.repositories.token import RegistrationTokenRepository
-from src.infrastructure.repositories.user import UserRepository
+from src.infrastructure.repositories.user import RegistrationTokenRepository, UserRepository
 from src.infrastructure.resources.database import new_session_maker
 from src.infrastructure.security import Argon2PwdHasher, JWTToken, SHA256Hasher
 
@@ -51,7 +50,7 @@ class InfrastructureProvider(Provider):
     user_repository = provide(
         UserRepository,
         scope=Scope.REQUEST,
-        provides=AnyOf[IUserReader, IUserSaver, IUserRemover, IUserEditor],
+        provides=AnyOf[UserRepository, IUserReader, IUserSaver, IUserRemover, IUserEditor],
     )
 
     registration_token_repository = provide(
@@ -62,10 +61,14 @@ class InfrastructureProvider(Provider):
 
     jwt_token = provide(JWTToken, scope=Scope.APP, provides=IJWTToken)
 
-    pwd_hasher = provide(Argon2PwdHasher, scope=Scope.APP, provides=IPwdHasher)
+    pwd_hasher = provide(Argon2PwdHasher, scope=Scope.APP, provides=AnyOf[Argon2PwdHasher, IPwdHasher])
 
-    sha256_hasher = provide(SHA256Hasher, scope=Scope.APP, provides=IHasher)
+    sha256_hasher = provide(SHA256Hasher, scope=Scope.APP, provides=AnyOf[SHA256Hasher, IHasher])
 
     translator = provide(Translator, scope=Scope.APP, provides=ITranslator)
 
-    random_string_generator = provide(StringDigitCodeGenerator, scope=Scope.APP, provides=IStringGenerator)
+    random_string_generator = provide(
+        StringDigitCodeGenerator,
+        scope=Scope.APP,
+        provides=AnyOf[StringDigitCodeGenerator, IStringGenerator],
+    )
