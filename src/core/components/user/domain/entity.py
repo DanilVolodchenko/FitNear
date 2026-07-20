@@ -33,6 +33,6 @@ class RegistrationTokenDM:
     user_id: int
     token_hash: str
     type: RegistrationTokenType
-    active: bool
+    is_active: bool
     expires_at: datetime
     created_at: datetime

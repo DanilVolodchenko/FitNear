@@ -5,7 +5,12 @@ from src.core.components.user.application.constants import (
     EMAIL_CONFIRMATION_CODE_LENGTH,
     EMAIL_CONFIRMATION_TOKEN_TIME_SEC,
 )
-from src.core.components.user.application.dto import ConfirmUserDTO, CreateRegisterTokenDTO, CreateUserDTO
+from src.core.components.user.application.dto import (
+    ConfirmUserDTO,
+    CreateRegisterTokenDTO,
+    CreateUserDTO,
+    RegisteredUserDTO,
+)
 from src.core.components.user.application.interface import (
     IRegistrationTokenEditor,
     IRegistrationTokenReader,
@@ -20,7 +25,7 @@ from src.core.components.user.domain.value_object import RegistrationTokenType
 from src.core.errors import FoundError
 from src.core.interfaces.communication import IEmailSender
 from src.core.interfaces.generator import IStringGenerator
-from src.core.interfaces.security import IHasher, IJWTToken, IPwdHasher
+from src.core.interfaces.security import IHasher, IPwdHasher
 from src.core.interfaces.transaction import ITransactionManager
 
 
@@ -35,7 +40,6 @@ class RegisterUserUseCase:
         reg_token_saver: IRegistrationTokenSaver,
         pwd_hasher: IPwdHasher,
         string_generator: IStringGenerator,
-        jwt_token: IJWTToken,
         hasher: IHasher,
         trx_manager: ITransactionManager,
         email_sender: IEmailSender,
@@ -48,12 +52,11 @@ class RegisterUserUseCase:
         self._reg_token_saver = reg_token_saver
         self._pwd_hasher = pwd_hasher
         self._string_generator = string_generator
-        self._jwt_token = jwt_token
         self._hasher = hasher
         self._trx_manager = trx_manager
         self._email_sender = email_sender
 
-    async def __call__(self, create_user_dto: CreateUserDTO) -> UserDM:
+    async def __call__(self, create_user_dto: CreateUserDTO) -> RegisteredUserDTO:
         user_dm = await self._user_reader.get_by_email(create_user_dto.email)
 
         if user_dm:
@@ -65,26 +68,22 @@ class RegisterUserUseCase:
 
         hash_pwd = await self._pwd_hasher.hash(create_user_dto.password)
 
-        user_dm = await self._user_saver.create(CreateUserDTO(
-            email=create_user_dto.email,
-            name=create_user_dto.name,
-            password=hash_pwd,
-            is_confirmed=False,
-        ))
+        user_dm = await self._user_saver.create(
+            CreateUserDTO(
+                email=create_user_dto.email,
+                name=create_user_dto.name,
+                password=hash_pwd,
+                is_confirmed=False,
+            ),
+        )
 
         registaration_code = await self._string_generator(EMAIL_CONFIRMATION_CODE_LENGTH)
 
-        expires_at = datetime.now(tz=UTC) + timedelta(seconds=EMAIL_CONFIRMATION_TOKEN_TIME_SEC)
-
-        jwt_token = await self._jwt_token.encode(
-            payload={'email': user_dm.email, 'expires_at': expires_at},
-            secret_key=self._security_config.jwt_secret_key,
-            algorithm=self._security_config.jwt_algorithm,
-        )
-
         token_hash = await self._hasher.hash(registaration_code, self._security_config.hash_key)
 
-        await self._reg_token_saver.create(
+        expires_at = datetime.now(tz=UTC) + timedelta(seconds=EMAIL_CONFIRMATION_TOKEN_TIME_SEC)
+
+        reg_token = await self._reg_token_saver.create(
             CreateRegisterTokenDTO(
                 user_id=user_dm.id,
                 token_hash=token_hash,
@@ -95,16 +94,14 @@ class RegisterUserUseCase:
 
         await self._trx_manager.commit()
 
-        server_link_email_confiramtion = self._server_config.get_confirmation_url(jwt_token)
-
         await self._email_sender.send_text(
             'Регистрация',
             sender=self._server_config.email,
             recipients=user_dm.email,
-            content=f'Перейдите по ссылке: \n {server_link_email_confiramtion}',
+            content=f'Код подтверждения: {registaration_code}',
         )
 
-        return jwt_token
+        return RegisteredUserDTO(registration_id=reg_token.id, expires_at=reg_token.expires_at)
 
 
 class ConfirmUseUseCase:

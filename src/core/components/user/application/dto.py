@@ -19,6 +19,12 @@ class CreateUserDTO:
 
 
 @dataclass(frozen=True, slots=True)
+class RegisteredUserDTO:
+    registration_id: int
+    expires_at: datetime
+
+
+@dataclass(frozen=True, slots=True)
 class ConfirmUserDTO:
     confirmation_code: str
 
@@ -29,4 +35,4 @@ class CreateRegisterTokenDTO:
     token_hash: str
     type: RegistrationTokenType
     expires_at: datetime
-    active: bool = True
+    is_active: bool = True

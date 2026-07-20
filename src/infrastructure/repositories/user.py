@@ -126,7 +126,7 @@ class RegistrationTokenRepository(IRegistrationTokenReader, IRegistrationTokenSa
             user_id=entity.user_id,
             token_hash=entity.token_hash,
             type=entity.type,
-            active=entity.active,
+            is_active=entity.is_active,
             expires_at=entity.expires_at,
             created_at=entity.created_at,
         )
@@ -145,7 +145,7 @@ class RegistrationTokenRepository(IRegistrationTokenReader, IRegistrationTokenSa
             user_id=entity.user_id,
             token_hash=entity.token_hash,
             type=entity.type,
-            active=entity.active,
+            is_active=entity.is_active,
             expires_at=entity.expires_at,
             created_at=entity.created_at,
         )
@@ -153,8 +153,8 @@ class RegistrationTokenRepository(IRegistrationTokenReader, IRegistrationTokenSa
     async def create(self, token_dto: CreateRegisterTokenDTO) -> RegistrationTokenDM:
         stmt = text(
             """
-            INSERT INTO registration_tokens (user_id, token_hash, type, active, expires_at)
-            VALUES (:user_id, :token_hash, :type, :active, :expires_at)
+            INSERT INTO registration_tokens (user_id, token_hash, type, is_active, expires_at)
+            VALUES (:user_id, :token_hash, :type, :is_active, :expires_at)
             RETURNING *
             """  # ruff: ignore[missing-trailing-comma]
         )
@@ -165,7 +165,7 @@ class RegistrationTokenRepository(IRegistrationTokenReader, IRegistrationTokenSa
                 'user_id': token_dto.user_id,
                 'token_hash': token_dto.token_hash,
                 'type': token_dto.type,
-                'active': token_dto.active,
+                'is_active': token_dto.is_active,
                 'expires_at': token_dto.expires_at,
             },
         )
@@ -177,12 +177,12 @@ class RegistrationTokenRepository(IRegistrationTokenReader, IRegistrationTokenSa
             user_id=entity.user_id,
             token_hash=entity.token_hash,
             type=entity.type,
-            active=entity.active,
+            is_active=entity.is_active,
             expires_at=entity.expires_at,
             created_at=entity.created_at,
         )
 
     async def deactivate(self, token_id: int) -> None:
-        stmt = text('UPDATE registration_tokens SET active = false WHERE id = :id')
+        stmt = text('UPDATE registration_tokens SET is_active = false WHERE id = :id')
 
         await self._session.execute(statement=stmt, params={'id': token_id})
