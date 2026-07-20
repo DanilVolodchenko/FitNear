@@ -2,7 +2,7 @@ from enum import StrEnum
 from typing import Any, Self
 
 from dotenv import dotenv_values
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, EmailStr, Field, model_validator
 from sqlalchemy import URL
 
 from . import config_path
@@ -28,15 +28,15 @@ class FastApiConfig(BaseModel):
 class ServerConfig(BaseModel):
     mode: ServerMode = Field(ServerMode.PROD, alias='SERVER_MODE')
     dns: str = Field('localhost:8000', alias='SERVER_DNS')
+    email: EmailStr = Field(alias='SERVER_EMAIL')
 
     @property
     def http_url(self) -> str:
         protocol = 'http' if self.mode == ServerMode.DEV else 'https'
         return f'{protocol}://{self.dns}'
 
-    @property
-    def confirmation_url(self) -> str:
-        return f'{self.http_url}/api/v1/user/confirm'
+    def get_confirmation_url(self, confirmation_token: str) -> str:
+        return f'{self.http_url}/api/v1/user/confirm?confirmation-token={confirmation_token}'
 
 
 class PostgresConfig(BaseModel):

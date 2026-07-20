@@ -15,11 +15,13 @@ from src.core.components.user.application.interface import (
     IUserRemover,
     IUserSaver,
 )
+from src.core.interfaces.communication import IEmailSender
 from src.core.interfaces.generator import IStringGenerator
 from src.core.interfaces.localization import ITranslator
 from src.core.interfaces.log import ILogger
 from src.core.interfaces.security import IHasher, IJWTToken, IPwdHasher
 from src.core.interfaces.transaction import ITransactionManager
+from src.infrastructure.communication import SMTPEmailSender
 from src.infrastructure.generator import StringDigitCodeGenerator
 from src.infrastructure.localization import Translator
 from src.infrastructure.repositories.user import RegistrationTokenRepository, UserRepository
@@ -59,13 +61,15 @@ class InfrastructureProvider(Provider):
         provides=AnyOf[IRegistrationTokenReader, IRegistrationTokenSaver, IRegistrationTokenEditor],
     )
 
-    jwt_token = provide(JWTToken, scope=Scope.APP, provides=IJWTToken)
+    jwt_token = provide(JWTToken, scope=Scope.APP, provides=AnyOf[JWTToken, IJWTToken])
 
     pwd_hasher = provide(Argon2PwdHasher, scope=Scope.APP, provides=AnyOf[Argon2PwdHasher, IPwdHasher])
 
     sha256_hasher = provide(SHA256Hasher, scope=Scope.APP, provides=AnyOf[SHA256Hasher, IHasher])
 
-    translator = provide(Translator, scope=Scope.APP, provides=ITranslator)
+    translator = provide(Translator, scope=Scope.APP, provides=AnyOf[Translator, ITranslator])
+
+    smtp_email_sender = provide(SMTPEmailSender, scope=Scope.APP, provides=AnyOf[SMTPEmailSender, IEmailSender])
 
     random_string_generator = provide(
         StringDigitCodeGenerator,

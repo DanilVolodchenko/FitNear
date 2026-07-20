@@ -12,7 +12,7 @@ from src.core.interfaces.security import IHasher, IJWTToken, IPwdHasher
 
 
 class JWTToken(IJWTToken):
-    async def encode(self, payload: dict[str, Any], secret_key: str, algorithm: str) -> str:
+    async def encode(self, payload: dict[str, Any], *, secret_key: str, algorithm: str) -> str:
         return await asyncio.to_thread(jwt.encode, payload=payload, key=secret_key, algorithm=algorithm)
 
     async def decode(self, token: str, secret_key: str, algorithms: Sequence[str]) -> dict[str, Any]:

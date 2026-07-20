@@ -5,7 +5,7 @@ from typing import Any
 
 class IJWTToken(abc.ABC):
     @abc.abstractmethod
-    async def encode(self, payload: dict[str, Any], secret_key: str, algorithm: str) -> str:
+    async def encode(self, payload: dict[str, Any], *, secret_key: str, algorithm: str) -> str:
         """Encode payload to jwt token."""
 
     @abc.abstractmethod

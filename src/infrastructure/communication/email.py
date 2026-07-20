@@ -1,25 +1,25 @@
 from collections.abc import Sequence
 from email.message import EmailMessage
+from typing import Any
 
 import aiosmtplib
 
-from src.core.dto.communication import Message
-from src.core.interfaces.communication import IMessageSender
+from src.core.interfaces.communication import IEmailSender
 
 
-class SMTPEmailSender(IMessageSender):
-    async def send_message(self, message: Message) -> None:
+class SMTPEmailSender(IEmailSender):
+    async def send_text(
+        self, subject: str, sender: str, recipients: str | Sequence[str], content: str, **kwargs: Any,
+    ) -> None:
         async with aiosmtplib.SMTP() as smtp_client:
             email_message = EmailMessage()
-            email_message['From'] = message.sender
-            email_message['To'] = message.recipients
-            email_message['Subject'] = message.subject
+            email_message['Subject'] = subject
+            email_message['From'] = sender
+            email_message['To'] = recipients
+            email_message.set_content(content)
 
             await smtp_client.send_message(
                 email_message,
-                sender=message.sender,
-                recipients=message.recipients,
+                sender=sender,
+                recipients=recipients,
             )
-
-    async def send_messages(self, messages: Sequence[Message]) -> None:
-        pass
