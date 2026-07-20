@@ -35,9 +35,6 @@ class ServerConfig(BaseModel):
         protocol = 'http' if self.mode == ServerMode.DEV else 'https'
         return f'{protocol}://{self.dns}'
 
-    def get_confirmation_url(self, confirmation_token: str) -> str:
-        return f'{self.http_url}/api/v1/user/confirm?confirmation-token={confirmation_token}'
-
 
 class PostgresConfig(BaseModel):
     host: str = Field('localhost', alias='POSTGRESQL_HOST')
@@ -64,11 +61,17 @@ class SecurityConfig(BaseModel):
     hash_key: str = Field(alias='SECURITY_HASH_KEY')
 
 
+class SMTPConfig(BaseModel):
+    host: str = Field('localhost', alias='SMTP_HOST')
+    port: int = Field(1025, alias='SMTP_PORT')
+
+
 class Config(BaseModel):
     fastapi: FastApiConfig = Field(default_factory=lambda: FastApiConfig(**env))
     server: ServerConfig = Field(default_factory=lambda: ServerConfig(**env))
     postgres: PostgresConfig = Field(default_factory=lambda: PostgresConfig(**env))
     security: SecurityConfig = Field(default_factory=lambda: SecurityConfig(**env))
+    smtp: SMTPConfig = Field(default_factory=lambda: SMTPConfig(**env))
 
     @model_validator(mode='after')
     def check_env(self) -> Self:
