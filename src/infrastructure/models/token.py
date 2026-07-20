@@ -12,7 +12,7 @@ class RegistrationToken(Base):
     token_hash: Mapped[str] = mapped_column(index=True)
     used_at: Mapped[datetime | None] = mapped_column(default=None, nullable=True)
     type: Mapped[RegistrationTokenType]
-    active: Mapped[bool] = mapped_column(default=True, nullable=False)
+    is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
     expires_at: Mapped[datetime]
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
@@ -23,5 +23,6 @@ class AuthToken(Base):
     token_hash: Mapped[str] = mapped_column(index=True)
     user_agent: Mapped[str | None]
     ip_address: Mapped[str | None]
+    is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
     expires_at: Mapped[datetime] = mapped_column(nullable=False)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
