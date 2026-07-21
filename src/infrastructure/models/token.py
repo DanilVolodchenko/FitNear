@@ -12,6 +12,7 @@ class RegistrationToken(Base):
     token_hash: Mapped[str] = mapped_column(index=True)
     used_at: Mapped[datetime | None] = mapped_column(default=None, nullable=True)
     type: Mapped[RegistrationTokenType]
+    attemps: Mapped[int] = mapped_column(default=0, nullable=False)
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
     expires_at: Mapped[datetime]
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
