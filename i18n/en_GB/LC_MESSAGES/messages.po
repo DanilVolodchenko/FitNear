@@ -25,5 +25,8 @@ msgstr "User Not Found"
 msgid "User already exists."
 msgstr "User already exists."
 
+msgid "Error sending confirmation code to email"
+msgstr "Error sending confirmation code to email"
+
 msgid "Internal Server Error"
 msgstr "Internal Server Error"

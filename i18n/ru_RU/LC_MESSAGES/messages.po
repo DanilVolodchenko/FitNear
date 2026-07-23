@@ -26,5 +26,8 @@ msgstr "Пользователь не найден"
 msgid "User already exists"
 msgstr "Пользователь уже существует"
 
+msgid "Error sending confirmation code to email"
+msgstr "Не удалось отправить код подтверждения на почту"
+
 msgid "Internal Server Error"
 msgstr "Внутренняя ошибка сервера"
