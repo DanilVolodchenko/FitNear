@@ -24,6 +24,10 @@ class ILogger(abc.ABC):
         """Warning level."""
 
     @abc.abstractmethod
+    def exception(self, message: str, *args: Any, **kwargs: Any) -> None:
+        """Exception level."""
+
+    @abc.abstractmethod
     def error(self, message: str, *args: Any, **kwargs: Any) -> None:
         """Error level."""
 
