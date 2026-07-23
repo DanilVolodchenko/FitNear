@@ -131,9 +131,9 @@ class RegistrationTokenRepository(IRegistrationTokenReader, IRegistrationTokenSa
             created_at=entity.created_at,
         )
 
-    async def get_by_user_id(self, user_id: int) -> RegistrationTokenDM | None:
-        stmt = text('SELECT * FROM registration_tokens WHERE user_id = :user_id')
-        result = await self._session.execute(statement=stmt, params={'user_id': user_id})
+    async def get_by_id(self, ident: int) -> RegistrationTokenDM | None:
+        stmt = text('SELECT * FROM registration_tokens WHERE id = :id')
+        result = await self._session.execute(statement=stmt, params={'id': ident})
 
         entity = result.mappings().one_or_none()
 

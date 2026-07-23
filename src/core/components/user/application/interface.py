@@ -38,8 +38,8 @@ class IRegistrationTokenReader(abc.ABC):
         """Get token by token_hash."""
 
     @abc.abstractmethod
-    async def get_by_user_id(self, user_id: int) -> RegistrationTokenDM | None:
-        """Get token by user_id."""
+    async def get_by_id(self, ident: int) -> RegistrationTokenDM | None:
+        """Get token by id."""
 
 
 class IRegistrationTokenSaver(abc.ABC):
