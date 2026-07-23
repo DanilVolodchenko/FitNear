@@ -15,7 +15,6 @@ from src.core.components.user.application.interface import (
     IUserRemover,
     IUserSaver,
 )
-from src.core.interfaces.communication import IEmailSender
 from src.core.interfaces.generator import IStringGenerator
 from src.core.interfaces.localization import ITranslator
 from src.core.interfaces.log import ILogger

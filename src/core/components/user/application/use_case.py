@@ -1,6 +1,7 @@
 from datetime import UTC, datetime, timedelta
 
 from config import Config, SecurityConfig, ServerConfig
+from src.core import error
 from src.core.components.user.application.constants import (
     EMAIL_CONFIRMATION_CODE_LENGTH,
     EMAIL_CONFIRMATION_TOKEN_TIME_SEC,
@@ -10,6 +11,7 @@ from src.core.components.user.application.dto import (
     CreateRegisterTokenDTO,
     CreateUserDTO,
     RegisteredUserDTO,
+    RegisterUserDTO,
 )
 from src.core.components.user.application.interface import (
     IRegistrationTokenEditor,
@@ -20,9 +22,7 @@ from src.core.components.user.application.interface import (
     IUserRemover,
     IUserSaver,
 )
-from src.core.components.user.domain.entity import UserDM
 from src.core.components.user.domain.value_object import RegistrationTokenType
-from src.core.errors import FoundError
 from src.core.interfaces.communication import IEmailSender
 from src.core.interfaces.generator import IStringGenerator
 from src.core.interfaces.security import IHasher, IPwdHasher
@@ -56,23 +56,23 @@ class RegisterUserUseCase:
         self._trx_manager = trx_manager
         self._email_sender = email_sender
 
-    async def __call__(self, create_user_dto: CreateUserDTO) -> RegisteredUserDTO:
-        user_dm = await self._user_reader.get_by_email(create_user_dto.email)
+    async def __call__(self, reg_user_dto: RegisterUserDTO) -> RegisteredUserDTO:
+        user_dm = await self._user_reader.get_by_email(reg_user_dto.email)
 
         if user_dm:
             if not user_dm.is_confirmed:
                 await self._user_remover.remove_by_email(user_dm.email)
 
             else:
-                raise FoundError('User already exists')
+                raise error.FoundError('User already exists')
 
-        hash_pwd = await self._pwd_hasher.hash(create_user_dto.password)
+        pwd_hash = await self._pwd_hasher.hash(reg_user_dto.password)
 
         user_dm = await self._user_saver.create(
             CreateUserDTO(
-                email=create_user_dto.email,
-                name=create_user_dto.name,
-                password=hash_pwd,
+                email=reg_user_dto.email,
+                name=reg_user_dto.name,
+                password=pwd_hash,
                 is_confirmed=False,
             ),
         )
@@ -94,12 +94,15 @@ class RegisterUserUseCase:
 
         await self._trx_manager.commit()
 
-        await self._email_sender.send_text(
-            'Регистрация',
-            sender=self._server_config.email,
-            recipients=user_dm.email,
-            content=f'Код подтверждения: {registaration_code}',
-        )
+        try:
+            await self._email_sender.send_text(
+                'Регистрация',
+                sender=self._server_config.email,
+                recipients=user_dm.email,
+                content=f'Код подтверждения: {registaration_code}',
+            )
+        except Exception as exc:
+            raise error.SendEmailError('Error sending confirmation code to email') from exc
 
         return RegisteredUserDTO(registration_id=reg_token.id, expires_at=reg_token.expires_at)
 
@@ -123,26 +126,21 @@ class ConfirmUseUseCase:
         self._hasher = hasher
         self._trx_manager = trx_manager
 
-    async def __call__(self, user_id: int, confirm_user_dto: ConfirmUserDTO) -> None:
+    async def __call__(self, registration_id: int, confirm_user_dto: ConfirmUserDTO) -> None:
 
-        user_dm = await self._user_reader.get_by_id(user_id)
-
-        if not user_dm:
-            raise
-
-        registration_token_dm = await self._reg_token_reader.get_by_user_id(user_dm.id)
+        registration_token_dm = await self._reg_token_reader.get_by_id(registration_id)
 
         if not registration_token_dm:
-            raise
+            raise error.NotFoundError('Registration token not found')
 
         hash_code = await self._hasher.hash(confirm_user_dto.confirmation_code, self._config.security.hash_key)
 
         is_correct_code = await self._hasher.compare(hash_code, registration_token_dm.token_hash)
 
         if not is_correct_code:
-            raise
+            raise error.ConfirmationCodeError('Confirmation code is not correct.')
 
-        await self._user_editor.confirm_user_email(user_dm.id)
+        await self._user_editor.confirm_user_email(registration_token_dm.user_id)
         await self._reg_token_editor.deactivate(registration_token_dm.id)
 
         await self._trx_manager.commit()

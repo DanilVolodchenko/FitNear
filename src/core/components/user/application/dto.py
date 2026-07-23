@@ -19,6 +19,13 @@ class CreateUserDTO:
 
 
 @dataclass(frozen=True, slots=True)
+class RegisterUserDTO:
+    email: str
+    name: str
+    password: str
+
+
+@dataclass(frozen=True, slots=True)
 class RegisteredUserDTO:
     registration_id: int
     expires_at: datetime

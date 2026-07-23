@@ -2,7 +2,7 @@ from dishka.integrations.fastapi import DishkaRoute, FromDishka
 from fastapi import APIRouter, status
 
 from src.controller.http.v1.schemas.user import ConfirmUserSchema, RegisterUserSchema
-from src.core.components.user.application.dto import ConfirmUserDTO, CreateUserDTO
+from src.core.components.user.application.dto import ConfirmUserDTO, RegisteredUserDTO, RegisterUserDTO
 from src.core.components.user.application.use_case import ConfirmUseUseCase, RegisterUserUseCase
 
 router = APIRouter(prefix='/auth', tags=['Auth'], route_class=DishkaRoute)
@@ -12,9 +12,9 @@ router = APIRouter(prefix='/auth', tags=['Auth'], route_class=DishkaRoute)
 async def register(
     user: RegisterUserSchema,
     register_user: FromDishka[RegisterUserUseCase],
-) -> None:
+) -> RegisteredUserDTO:
 
-    user_dto = CreateUserDTO(
+    user_dto = RegisterUserDTO(
         email=user.email,
         name=user.name,
         password=user.password,
@@ -24,7 +24,7 @@ async def register(
 
 @router.post('/confirm/{user_id}', status_code=status.HTTP_204_NO_CONTENT, name='Подтверждение почты пользователя.')
 async def confirm(
-    user_id: int,
+    registration_id: int,
     user: ConfirmUserSchema,
     confirm_user: FromDishka[ConfirmUseUseCase],
 ) -> None:
@@ -33,4 +33,4 @@ async def confirm(
         confirmation_code=user.confirmation_code,
     )
 
-    return await confirm_user(user_id, confirm_user_dto)
+    return await confirm_user(registration_id, confirm_user_dto)
