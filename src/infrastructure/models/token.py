@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import ForeignKey, func
+from sqlalchemy import DateTime, ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.infrastructure.models.base import Base
@@ -14,8 +14,8 @@ class RegistrationToken(Base):
     type: Mapped[RegistrationTokenType]
     attemps: Mapped[int] = mapped_column(default=0, nullable=False)
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
-    expires_at: Mapped[datetime]
-    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
 class AuthToken(Base):
@@ -25,5 +25,5 @@ class AuthToken(Base):
     user_agent: Mapped[str | None]
     ip_address: Mapped[str | None]
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
-    expires_at: Mapped[datetime] = mapped_column(nullable=False)
-    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
