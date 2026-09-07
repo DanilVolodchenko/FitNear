@@ -15,12 +15,14 @@ from src.core.components.user.application.interface import (
     IUserRemover,
     IUserSaver,
 )
+from src.core.interfaces.event_bus import IEventBus
 from src.core.interfaces.generator import IStringGenerator
 from src.core.interfaces.localization import ITranslator
 from src.core.interfaces.log import ILogger
 from src.core.interfaces.security import IHasher, IJWTToken, IPwdHasher
 from src.core.interfaces.transaction import ITransactionManager
 from src.infrastructure.communication import SMTPEmailSender
+from src.infrastructure.event_bus.taskiq import TaskiqEventBus
 from src.infrastructure.generator import StringDigitCodeGenerator
 from src.infrastructure.localization import Translator
 from src.infrastructure.repositories.user import RegistrationTokenRepository, UserRepository
@@ -77,3 +79,5 @@ class InfrastructureProvider(Provider):
         scope=Scope.APP,
         provides=AnyOf[StringDigitCodeGenerator, IStringGenerator],
     )
+
+    taskiq_event_bus = provide(TaskiqEventBus, scope=Scope.APP, provides=AnyOf[TaskiqEventBus, IEventBus])

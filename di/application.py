@@ -14,7 +14,7 @@ from src.core.components.user.application.use_case import ConfirmUseUseCase, Reg
 from src.core.interfaces.generator import IStringGenerator
 from src.core.interfaces.security import IHasher, IPwdHasher
 from src.core.interfaces.transaction import ITransactionManager
-from src.infrastructure.communication import SMTPEmailSender
+from src.infrastructure.event_bus.taskiq import TaskiqEventBus
 from src.infrastructure.generator import StringDigitCodeGenerator
 from src.infrastructure.security import Argon2PwdHasher, SHA256Hasher
 
@@ -32,11 +32,11 @@ class ApplicationProvider(Provider):
         string_generator: StringDigitCodeGenerator,
         hasher: SHA256Hasher,
         trx_manager: ITransactionManager,
-        email_sender: SMTPEmailSender,
+        event_bus: TaskiqEventBus,
     ) -> RegisterUserUseCase:
         return RegisterUserUseCase(
             security_config=config.security,
-            server_cofig=config.server,
+            server_config=config.server,
             user_reader=user_reader,
             user_saver=user_saver,
             user_remover=user_remover,
@@ -45,7 +45,7 @@ class ApplicationProvider(Provider):
             string_generator=string_generator,
             hasher=hasher,
             trx_manager=trx_manager,
-            email_sender=email_sender,
+            event_bus=event_bus,
         )
 
     @provide(scope=Scope.REQUEST)

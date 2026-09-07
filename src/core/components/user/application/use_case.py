@@ -13,6 +13,7 @@ from src.core.components.user.application.dto import (
     RegisteredUserDTO,
     RegisterUserDTO,
 )
+from src.core.components.user.application.event import UserEmailConfirmationEvent
 from src.core.components.user.application.interface import (
     IRegistrationTokenEditor,
     IRegistrationTokenReader,
@@ -23,7 +24,7 @@ from src.core.components.user.application.interface import (
     IUserSaver,
 )
 from src.core.components.user.domain.value_object import RegistrationTokenType
-from src.core.interfaces.communication import IEmailSender
+from src.core.interfaces.event_bus import IEventBus
 from src.core.interfaces.generator import IStringGenerator
 from src.core.interfaces.security import IHasher, IPwdHasher
 from src.core.interfaces.transaction import ITransactionManager
@@ -33,7 +34,7 @@ class RegisterUserUseCase:
     def __init__(
         self,
         security_config: SecurityConfig,
-        server_cofig: ServerConfig,
+        server_config: ServerConfig,
         user_reader: IUserReader,
         user_saver: IUserSaver,
         user_remover: IUserRemover,
@@ -42,10 +43,10 @@ class RegisterUserUseCase:
         string_generator: IStringGenerator,
         hasher: IHasher,
         trx_manager: ITransactionManager,
-        email_sender: IEmailSender,
+        event_bus: IEventBus,
     ) -> None:
         self._security_config = security_config
-        self._server_config = server_cofig
+        self._server_config = server_config
         self._user_reader = user_reader
         self._user_saver = user_saver
         self._user_remover = user_remover
@@ -54,7 +55,7 @@ class RegisterUserUseCase:
         self._string_generator = string_generator
         self._hasher = hasher
         self._trx_manager = trx_manager
-        self._email_sender = email_sender
+        self._event_bus = event_bus
 
     async def __call__(self, reg_user_dto: RegisterUserDTO) -> RegisteredUserDTO:
         user_dm = await self._user_reader.get_by_email(reg_user_dto.email)
@@ -77,9 +78,9 @@ class RegisterUserUseCase:
             ),
         )
 
-        registaration_code = await self._string_generator(EMAIL_CONFIRMATION_CODE_LENGTH)
+        registration_code = await self._string_generator(EMAIL_CONFIRMATION_CODE_LENGTH)
 
-        token_hash = await self._hasher.hash(registaration_code, self._security_config.hash_key)
+        token_hash = await self._hasher.hash(registration_code, self._security_config.hash_key)
 
         expires_at = datetime.now(tz=UTC) + timedelta(seconds=EMAIL_CONFIRMATION_TOKEN_TIME_SEC)
 
@@ -94,15 +95,14 @@ class RegisterUserUseCase:
 
         await self._trx_manager.commit()
 
-        try:
-            await self._email_sender.send_text(
-                'Регистрация',
+        await self._event_bus.publish(
+            UserEmailConfirmationEvent(
+                subject='Регистрация',
                 sender=self._server_config.email,
-                recipients=user_dm.email,
-                content=f'Код подтверждения: {registaration_code}',
-            )
-        except Exception as exc:
-            raise error.SendEmailError('Error sending confirmation code to email') from exc
+                recipient=user_dm.email,
+                content=f'Код подтверждения: {registration_code}',
+            ),
+        )
 
         return RegisteredUserDTO(registration_id=reg_token.id, expires_at=reg_token.expires_at)
 
