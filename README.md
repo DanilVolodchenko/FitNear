@@ -1,0 +1,1 @@
+taskiq worker run: `taskiq worker main:redis_broker --worker 1`

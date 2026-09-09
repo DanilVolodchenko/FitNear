@@ -22,7 +22,11 @@ async def register(
     return await register_user(user_dto)
 
 
-@router.post('/confirm/{user_id}', status_code=status.HTTP_204_NO_CONTENT, name='Подтверждение почты пользователя.')
+@router.post(
+    '/confirm/{registration_id}',
+    status_code=status.HTTP_204_NO_CONTENT,
+    name='Подтверждение почты пользователя.',
+)
 async def confirm(
     registration_id: int,
     user: ConfirmUserSchema,

@@ -4,16 +4,23 @@ from taskiq.decor import AsyncTaskiqDecoratedTask
 
 from src.core.components.user.application.event import UserEmailConfirmationEvent
 from src.core.interfaces.event_bus import Event, IEventBus
+from src.core.interfaces.log import ILogger
+from src.infrastructure.tasks.communication import send_email_task
 
 
 class TaskiqEventBus(IEventBus):
-    def __init__(self) -> None:
+    def __init__(self, logger: ILogger) -> None:
+        self._logger = logger
+
         self._handlers: dict[type[Event], list[AsyncTaskiqDecoratedTask]] = {
-            UserEmailConfirmationEvent: [],
+            UserEmailConfirmationEvent: [send_email_task],
         }
 
     async def publish(self, event: Event) -> None:
         handlers = self._handlers.get(type(event), [])
 
+        if not handlers:
+            self._logger.warning('Handler for event={} not found', event)
+
         for handler in handlers:
-            await handler.kiq(dataclasses.asdict(event))
+            await handler.kiq(**dataclasses.asdict(event))

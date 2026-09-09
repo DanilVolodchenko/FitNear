@@ -42,4 +42,5 @@ class CreateRegisterTokenDTO:
     token_hash: str
     type: RegistrationTokenType
     expires_at: datetime
+    attempts: int = 1
     is_active: bool = True
