@@ -1,8 +1,13 @@
 from collections.abc import AsyncGenerator
+from typing import Final
 
 from redis import exceptions
 from redis.asyncio import Redis
 from taskiq_redis.redis_broker import ListQueueBroker
+
+from config import config
+
+BROKER_DB: Final[int] = 0
 
 
 class RedisListQueueBroker(ListQueueBroker):
@@ -26,4 +31,4 @@ class RedisListQueueBroker(ListQueueBroker):
                 continue
 
 
-redis_broker = RedisListQueueBroker('redis://localhost:6379/8')
+redis_broker = RedisListQueueBroker(f'{config.redis.dsn}/{BROKER_DB}')

@@ -12,7 +12,7 @@ config = context.config
 
 config.set_main_option(
     'sqlalchemy.url',
-    server_config.postgres.uri.render_as_string(hide_password=False),
+    server_config.postgres.dsn.unicode_string(),
 )
 
 # Interpret the config file for Python logging.

@@ -22,7 +22,7 @@ async def create_db_if_not_exists(psql_config: PostgresConfig) -> None:
 
 def new_session_maker(psql_config: PostgresConfig) -> async_sessionmaker[AsyncSession]:
     engine = create_async_engine(
-        psql_config.uri,
+        psql_config.dsn.unicode_string(),
         pool_size=15,
         max_overflow=15,
         connect_args={

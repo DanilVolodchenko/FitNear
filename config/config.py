@@ -2,8 +2,7 @@ from enum import StrEnum
 from typing import Any, Self
 
 from dotenv import dotenv_values
-from pydantic import BaseModel, EmailStr, Field, model_validator
-from sqlalchemy import URL
+from pydantic import BaseModel, EmailStr, Field, PostgresDsn, RedisDsn, model_validator
 
 from . import config_path
 
@@ -44,14 +43,31 @@ class PostgresConfig(BaseModel):
     pwd: str = Field(alias='POSTGRESQL_PWD')
 
     @property
-    def uri(self) -> URL:
-        return URL.create(
-            drivername='postgresql+psycopg',
+    def dsn(self) -> PostgresDsn:
+        return PostgresDsn.build(
+            scheme='postgresql+psycopg',
             host=self.host,
             port=self.port,
-            database=self.db,
+            path=self.db,
             username=self.username,
             password=self.pwd,
+        )
+
+
+class RedisConfig(BaseModel):
+    host: str = Field('localhost', alias='REDIS_HOST')
+    port: int = Field(6379, alias='REDIS_PORT')
+    username: str | None = Field(None, alias='REDIS_USERNAME')
+    pwd: str | None = Field(None, alias='REDIS_PWD')
+
+    @property
+    def dsn(self) -> RedisDsn:
+        return RedisDsn.build(
+            scheme='redis',
+            username=self.username,
+            password=self.pwd,
+            host=self.host,
+            port=self.port,
         )
 
 
@@ -70,6 +86,7 @@ class Config(BaseModel):
     fastapi: FastApiConfig = Field(default_factory=lambda: FastApiConfig(**env))
     server: ServerConfig = Field(default_factory=lambda: ServerConfig(**env))
     postgres: PostgresConfig = Field(default_factory=lambda: PostgresConfig(**env))
+    redis: RedisConfig = Field(default_factory=lambda: RedisConfig(**env))
     security: SecurityConfig = Field(default_factory=lambda: SecurityConfig(**env))
     smtp: SMTPConfig = Field(default_factory=lambda: SMTPConfig(**env))
 
