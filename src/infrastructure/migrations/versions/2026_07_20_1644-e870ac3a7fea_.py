@@ -46,7 +46,7 @@ def upgrade() -> None:
             sa.Enum('EMAIL_CONFIRMATION', 'PASSWORD_RESET', name='registrationtokentype'),
             nullable=False,
         ),
-        sa.Column('attemps', sa.Integer(), nullable=False, default=0),
+        sa.Column('attempts', sa.Integer(), nullable=False, default=0),
         sa.Column('is_active', sa.Boolean(), nullable=False),
         sa.Column('expires_at', sa.DateTime(), nullable=False),
         sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
