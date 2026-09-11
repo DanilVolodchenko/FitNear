@@ -10,9 +10,7 @@ from src.controller.http import router
 def register_fastapi_app(fastapi_config: FastApiConfig) -> FastAPI:
     app = FastAPI(**fastapi_config.model_dump(), lifespan=lifespan)
 
-
     app.include_router(router)
-
     register_fastapi_error_handlers(app)
 
     return app

@@ -2,6 +2,7 @@ __all__ = [
     'Config',
     'FastApiConfig',
     'PostgresConfig',
+    'RedisConfig',
     'SMTPConfig',
     'SecurityConfig',
     'ServerConfig',
@@ -10,4 +11,4 @@ __all__ = [
 ]
 
 from . import config_path
-from .config import Config, FastApiConfig, PostgresConfig, SecurityConfig, ServerConfig, SMTPConfig, config
+from .config import Config, FastApiConfig, PostgresConfig, RedisConfig, SecurityConfig, ServerConfig, SMTPConfig, config

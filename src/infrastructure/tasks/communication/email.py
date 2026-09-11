@@ -3,10 +3,10 @@ from collections.abc import Sequence
 from dishka.integrations.taskiq import FromDishka, inject
 
 from src.infrastructure.communication.email import SMTPEmailSender
-from src.infrastructure.resources.taskiq import redis_broker
+from src.infrastructure.resources.broker import redis_list_queue_broker
 
 
-@redis_broker.task
+@redis_list_queue_broker.task
 @inject(patch_module=True)
 async def send_email_task(
     subject: str,

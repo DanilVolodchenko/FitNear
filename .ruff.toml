@@ -97,7 +97,8 @@ ignore = [
     'TRY400',
     'PLE1205',
     'CPY001',
-    'PLR0917'
+    'PLR0917',
+    'RUF002',
 ]
 
 [lint.per-file-ignores]

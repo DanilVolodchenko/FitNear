@@ -24,11 +24,11 @@ class RedisListQueueBroker(ListQueueBroker):
                     brpop_result = await redis_conn.brpop(self.queue_name)
                     if brpop_result is None:
                         continue
-                    yield brpop_result[redis_brpop_data_position]  # type: ignore[misc]
+                    yield brpop_result[redis_brpop_data_position]
             except ConnectionError:
                 continue
             except exceptions.TimeoutError:
                 continue
 
 
-redis_broker = RedisListQueueBroker(f'{config.redis.dsn}/{BROKER_DB}')
+redis_list_queue_broker = RedisListQueueBroker(f'{config.redis.dsn}/{BROKER_DB}')
