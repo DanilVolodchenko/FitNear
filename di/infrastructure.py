@@ -10,6 +10,7 @@ from src.core.components.user.application.interface import (
     IRegistrationTokenEditor,
     IRegistrationTokenReader,
     IRegistrationTokenSaver,
+    ISettingsSaver,
     IUserEditor,
     IUserReader,
     IUserRemover,
@@ -25,7 +26,7 @@ from src.infrastructure.communication import SMTPEmailSender
 from src.infrastructure.event_bus.taskiq import TaskiqEventBus
 from src.infrastructure.generator import StringDigitCodeGenerator
 from src.infrastructure.localization import Translator
-from src.infrastructure.repositories.user import RegistrationTokenRepository, UserRepository
+from src.infrastructure.repositories.user import RegistrationTokenRepository, SettingsRepository, UserRepository
 from src.infrastructure.resources.database import new_session_maker
 from src.infrastructure.security import Argon2PwdHasher, JWTToken, SHA256Hasher
 
@@ -54,6 +55,12 @@ class InfrastructureProvider(Provider):
         UserRepository,
         scope=Scope.REQUEST,
         provides=AnyOf[UserRepository, IUserReader, IUserSaver, IUserRemover, IUserEditor],
+    )
+
+    settings_repository = provide(
+        SettingsRepository,
+        scope=Scope.REQUEST,
+        provides=AnyOf[SettingsRepository, ISettingsSaver],
     )
 
     registration_token_repository = provide(

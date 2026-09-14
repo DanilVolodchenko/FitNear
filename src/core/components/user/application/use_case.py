@@ -9,6 +9,7 @@ from src.core.components.user.application.constants import (
 from src.core.components.user.application.dto import (
     ConfirmUserDTO,
     CreateRegisterTokenDTO,
+    CreateSettingsDTO,
     CreateUserDTO,
     RegisteredUserDTO,
     RegisterUserDTO,
@@ -18,6 +19,7 @@ from src.core.components.user.application.interface import (
     IRegistrationTokenEditor,
     IRegistrationTokenReader,
     IRegistrationTokenSaver,
+    ISettingsSaver,
     IUserEditor,
     IUserReader,
     IUserRemover,
@@ -38,6 +40,7 @@ class RegisterUserUseCase:
         user_reader: IUserReader,
         user_saver: IUserSaver,
         user_remover: IUserRemover,
+        settings_saver: ISettingsSaver,
         reg_token_saver: IRegistrationTokenSaver,
         pwd_hasher: IPwdHasher,
         string_generator: IStringGenerator,
@@ -50,6 +53,7 @@ class RegisterUserUseCase:
         self._user_reader = user_reader
         self._user_saver = user_saver
         self._user_remover = user_remover
+        self._settings_saver = settings_saver
         self._reg_token_saver = reg_token_saver
         self._pwd_hasher = pwd_hasher
         self._string_generator = string_generator
@@ -67,14 +71,22 @@ class RegisterUserUseCase:
             else:
                 raise error.FoundError('User already exists')
 
-        pwd_hash = await self._pwd_hasher.hash(reg_user_dto.password)
+        hashed_pwd = await self._pwd_hasher.hash(reg_user_dto.password)
 
         user_dm = await self._user_saver.create(
             CreateUserDTO(
                 email=reg_user_dto.email,
                 name=reg_user_dto.name,
-                password=pwd_hash,
+                hashed_password=hashed_pwd,
                 is_confirmed=False,
+            ),
+        )
+
+        await self._settings_saver.create(
+            CreateSettingsDTO(
+                language=reg_user_dto.settings.language,
+                theme=reg_user_dto.settings.theme,
+                user_id=user_dm.id,
             ),
         )
 

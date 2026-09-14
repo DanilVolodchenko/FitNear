@@ -8,3 +8,13 @@ class RegistrationTokenType(StrEnum):
 
 class AuthTokenType(StrEnum):
     REFRESH = 'REFRESH'
+
+
+class LanguageType(StrEnum):
+    RU = 'RU'
+    EN = 'EN'
+
+
+class ThemeType(StrEnum):
+    WHITE = 'WHITE'
+    BLACK = 'BLACK'

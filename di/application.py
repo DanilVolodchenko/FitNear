@@ -5,14 +5,14 @@ from src.core.components.user.application.interface import (
     IRegistrationTokenEditor,
     IRegistrationTokenReader,
     IRegistrationTokenSaver,
+    ISettingsSaver,
     IUserEditor,
     IUserReader,
     IUserRemover,
     IUserSaver,
 )
 from src.core.components.user.application.use_case import ConfirmUseUseCase, RegisterUserUseCase
-from src.core.interfaces.generator import IStringGenerator
-from src.core.interfaces.security import IHasher, IPwdHasher
+from src.core.interfaces.security import IHasher
 from src.core.interfaces.transaction import ITransactionManager
 from src.infrastructure.event_bus.taskiq import TaskiqEventBus
 from src.infrastructure.generator import StringDigitCodeGenerator
@@ -27,6 +27,7 @@ class ApplicationProvider(Provider):
         user_reader: IUserReader,
         user_saver: IUserSaver,
         user_remover: IUserRemover,
+        settings_saver: ISettingsSaver,
         reg_token_saver: IRegistrationTokenSaver,
         pwd_hasher: Argon2PwdHasher,
         string_generator: StringDigitCodeGenerator,
@@ -40,6 +41,7 @@ class ApplicationProvider(Provider):
             user_reader=user_reader,
             user_saver=user_saver,
             user_remover=user_remover,
+            settings_saver=settings_saver,
             reg_token_saver=reg_token_saver,
             pwd_hasher=pwd_hasher,
             string_generator=string_generator,
@@ -54,11 +56,8 @@ class ApplicationProvider(Provider):
         config: Config,
         user_reader: IUserReader,
         user_editor: IUserEditor,
-        user_remover: IUserRemover,
         reg_token_reader: IRegistrationTokenReader,
         reg_token_editor: IRegistrationTokenEditor,
-        pwd_hasher: IPwdHasher,
-        string_generator: IStringGenerator,
         hasher: IHasher,
         trx_manager: ITransactionManager,
     ) -> ConfirmUseUseCase:

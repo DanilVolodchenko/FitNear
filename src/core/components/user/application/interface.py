@@ -1,7 +1,7 @@
 import abc
 
-from src.core.components.user.application.dto import CreateRegisterTokenDTO, CreateUserDTO
-from src.core.components.user.domain.entity import RegistrationTokenDM, UserDM
+from src.core.components.user.application.dto import CreateRegisterTokenDTO, CreateSettingsDTO, CreateUserDTO
+from src.core.components.user.domain.entity import RegistrationTokenDM, SettingsDM, UserDM
 
 
 class IUserReader(abc.ABC):
@@ -16,7 +16,7 @@ class IUserReader(abc.ABC):
 
 class IUserSaver(abc.ABC):
     @abc.abstractmethod
-    async def create(self, user: CreateUserDTO) -> UserDM:
+    async def create(self, user_dto: CreateUserDTO) -> UserDM:
         """Create new user."""
 
 
@@ -30,6 +30,12 @@ class IUserRemover(abc.ABC):
     @abc.abstractmethod
     async def remove_by_email(self, email: str) -> None:
         """Remove user by email."""
+
+
+class ISettingsSaver(abc.ABC):
+    @abc.abstractmethod
+    async def create(self, settings_dto: CreateSettingsDTO) -> SettingsDM:
+        """Create user settings."""
 
 
 class IRegistrationTokenReader(abc.ABC):

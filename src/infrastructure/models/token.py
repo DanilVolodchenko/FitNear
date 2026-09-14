@@ -4,10 +4,12 @@ from sqlalchemy import DateTime, ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.infrastructure.models.base import Base
-from src.infrastructure.models.choises import AuthTokenType, RegistrationTokenType
+from src.infrastructure.models.choices import AuthTokenType, RegistrationTokenType
 
 
 class RegistrationToken(Base):
+    __tablename__ = 'registration_tokens'
+
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'))
     token_hash: Mapped[str] = mapped_column(index=True)
     used_at: Mapped[datetime | None] = mapped_column(default=None, nullable=True)
@@ -19,6 +21,8 @@ class RegistrationToken(Base):
 
 
 class AuthToken(Base):
+    __tablename__ = 'auth_tokens'
+
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     type: Mapped[AuthTokenType]
     token_hash: Mapped[str] = mapped_column(index=True)

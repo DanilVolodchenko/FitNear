@@ -1,17 +1,18 @@
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy.sql import text
 
-from src.core.components.user.application.dto import CreateRegisterTokenDTO, CreateUserDTO
+from src.core.components.user.application.dto import CreateRegisterTokenDTO, CreateSettingsDTO, CreateUserDTO
 from src.core.components.user.application.interface import (
     IRegistrationTokenEditor,
     IRegistrationTokenReader,
     IRegistrationTokenSaver,
+    ISettingsSaver,
     IUserEditor,
     IUserReader,
     IUserRemover,
     IUserSaver,
 )
-from src.core.components.user.domain.entity import RegistrationTokenDM, UserDM
+from src.core.components.user.domain.entity import RegistrationTokenDM, SettingsDM, UserDM
 
 
 class UserRepository(IUserReader, IUserSaver, IUserEditor, IUserRemover):
@@ -34,7 +35,7 @@ class UserRepository(IUserReader, IUserSaver, IUserEditor, IUserRemover):
             id=entity.id,
             email=entity.email,
             name=entity.name,
-            password=entity.password,
+            hashed_password=entity.hashed_password,
             is_confirmed=entity.is_confirmed,
             created_at=entity.created_at,
             updated_at=entity.updated_at,
@@ -56,17 +57,17 @@ class UserRepository(IUserReader, IUserSaver, IUserEditor, IUserRemover):
             id=entity.id,
             email=entity.email,
             name=entity.name,
-            password=entity.password,
+            hashed_password=entity.hashed_password,
             is_confirmed=entity.is_confirmed,
             created_at=entity.created_at,
             updated_at=entity.updated_at,
         )
 
-    async def create(self, user: CreateUserDTO) -> UserDM:
+    async def create(self, user_dto: CreateUserDTO) -> UserDM:
         stmt = text(
             """
-            INSERT INTO users (email, name, password, is_confirmed)
-            VALUES (:email, :name, :password, :is_confirmed)
+            INSERT INTO users (email, name, hashed_password, is_confirmed)
+            VALUES (:email, :name, :hashed_password, :is_confirmed)
             RETURNING *;
             """  # ruff: ignore[missing-trailing-comma]
         )
@@ -74,10 +75,10 @@ class UserRepository(IUserReader, IUserSaver, IUserEditor, IUserRemover):
         result = await self._session.execute(
             statement=stmt,
             params={
-                'email': user.email,
-                'name': user.name,
-                'password': user.password,
-                'is_confirmed': user.is_confirmed,
+                'email': user_dto.email,
+                'name': user_dto.name,
+                'hashed_password': user_dto.hashed_password,
+                'is_confirmed': user_dto.is_confirmed,
             },
         )
 
@@ -87,7 +88,7 @@ class UserRepository(IUserReader, IUserSaver, IUserEditor, IUserRemover):
             id=entity.id,
             email=entity.email,
             name=entity.name,
-            password=entity.password,
+            hashed_password=entity.hashed_password,
             is_confirmed=entity.is_confirmed,
             created_at=entity.created_at,
             updated_at=entity.updated_at,
@@ -105,6 +106,27 @@ class UserRepository(IUserReader, IUserSaver, IUserEditor, IUserRemover):
         stmt = text('DELETE FROM users WHERE email = :email')
 
         await self._session.execute(statement=stmt, params={'email': email})
+
+
+class SettingsRepository(ISettingsSaver):
+    def __init__(self, session: AsyncSession) -> None:
+        self._session = session
+
+    async def create(self, settings_dto: CreateSettingsDTO) -> SettingsDM:
+        stmt = text('INSERT INTO settings (language, theme, user_id) VALUES (:language, :theme, :user_id) RETURNING *')
+
+        result = await self._session.execute(
+            statement=stmt,
+            params={
+                'language': settings_dto.language,
+                'theme': settings_dto.theme,
+                'user_id': settings_dto.user_id,
+            },
+        )
+
+        entity = result.mappings().one()
+
+        return SettingsDM(id=entity.id, language=entity.language, theme=entity.theme, user_id=entity.user_id)
 
 
 class RegistrationTokenRepository(IRegistrationTokenReader, IRegistrationTokenSaver, IRegistrationTokenEditor):

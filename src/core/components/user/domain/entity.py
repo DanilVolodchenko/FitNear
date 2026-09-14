@@ -1,33 +1,42 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from src.core.components.user.domain.value_object import RegistrationTokenType
+from src.core.components.user.domain.value_object import LanguageType, RegistrationTokenType, ThemeType
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class UserDM:
     id: int
     email: str
     name: str
-    password: str
+    hashed_password: str
     is_confirmed: bool
     created_at: datetime
     updated_at: datetime | None
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
+class SettingsDM:
+    id: int
+    language: LanguageType
+    theme: ThemeType
+
+    user_id: int
+
+
+@dataclass(slots=True, frozen=True)
 class RoleDM:
     name: str
     description: str | None
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class PermissionDM:
     name: str
     description: str | None
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class RegistrationTokenDM:
     id: int
     user_id: int
