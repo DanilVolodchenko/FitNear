@@ -31,3 +31,9 @@ msgstr "Не удалось отправить код подтверждения
 
 msgid "Internal Server Error"
 msgstr "Внутренняя ошибка сервера"
+
+msgid "Registration token not found"
+msgstr "Регистрационный номер не найден"
+
+msgid "Incorrect confirmation code"
+msgstr "Неверный код подтверждения"

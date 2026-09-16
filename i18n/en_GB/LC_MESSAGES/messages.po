@@ -22,11 +22,17 @@ msgstr ""
 msgid "User Not Found"
 msgstr "User Not Found"
 
-msgid "User already exists."
-msgstr "User already exists."
+msgid "User already exists"
+msgstr "User already exists"
 
 msgid "Error sending confirmation code to email"
 msgstr "Error sending confirmation code to email"
 
 msgid "Internal Server Error"
 msgstr "Internal Server Error"
+
+msgid "Registration token not found"
+msgstr "Registration token not found"
+
+msgid "Incorrect confirmation code"
+msgstr "Incorrect confirmation code"

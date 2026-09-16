@@ -18,14 +18,17 @@ msgstr ""
 "Generated-By: Babel 2.18.0\n"
 
 #: FitNear
-msgid "User Not Found."
+msgid "User Not Found"
 msgstr ""
 
 msgid "User already exists"
 msgstr ""
 
-msgid "Error sending confirmation code to email"
+msgid "Internal Server Error"
 msgstr ""
 
-msgid "Internal Server Error"
+msgid "Registration token not found"
+msgstr ""
+
+msgid "Incorrect confirmation code"
 msgstr ""
