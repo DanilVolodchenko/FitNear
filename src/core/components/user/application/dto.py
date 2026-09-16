@@ -5,25 +5,22 @@ from src.core.components.user.domain.value_object import LanguageType, Registrat
 
 
 @dataclass(frozen=True, slots=True)
-class GetUserDTO:
-    username: str
-    password: str
+class BaseUserDTO:
+    email: str
 
 
 @dataclass(frozen=True, slots=True)
-class CreateUserDTO:
-    email: str
-    name: str
-    hashed_password: str
-    is_confirmed: bool = False
-
-
-@dataclass(frozen=True, slots=True)
-class RegisterUserDTO:
-    email: str
+class RegisterUserDTO(BaseUserDTO):
     name: str
     password: str
     settings: RegisterSettingsDTO
+
+
+@dataclass(frozen=True, slots=True)
+class CreateUserDTO(BaseUserDTO):
+    name: str
+    hashed_password: str
+    is_confirmed: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -41,6 +38,11 @@ class RegisteredUserDTO:
 @dataclass(frozen=True, slots=True)
 class ConfirmUserDTO:
     confirmation_code: str
+
+
+@dataclass(frozen=True, slots=True)
+class LoginUserDTO(BaseUserDTO):
+    password: str
 
 
 @dataclass(frozen=True, slots=True)

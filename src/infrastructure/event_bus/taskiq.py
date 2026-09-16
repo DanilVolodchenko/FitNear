@@ -3,8 +3,8 @@ import dataclasses
 from taskiq.decor import AsyncTaskiqDecoratedTask
 
 from src.core.components.user.application.event import UserEmailConfirmationEvent
-from src.core.interfaces.event_bus import Event, IEventBus
-from src.core.interfaces.log import ILogger
+from src.core.shared_kernel.application.interfaces.event_bus import Event, IEventBus
+from src.core.shared_kernel.application.interfaces.log import ILogger
 from src.infrastructure.tasks.communication import send_email_task
 
 

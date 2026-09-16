@@ -5,7 +5,7 @@ from typing import Any
 import aiosmtplib
 
 from config import SMTPConfig
-from src.core.interfaces.communication import IEmailSender
+from src.core.shared_kernel.application.interfaces.communication import IEmailSender
 
 
 class SMTPEmailSender(IEmailSender):

@@ -8,6 +8,7 @@ from taskiq_redis.redis_broker import ListQueueBroker
 from config import config
 
 BROKER_DB: Final[int] = 0
+QUEUE_NAME: Final[str] = 'bg_tasks'
 
 
 class RedisListQueueBroker(ListQueueBroker):
@@ -31,4 +32,4 @@ class RedisListQueueBroker(ListQueueBroker):
                 continue
 
 
-redis_list_queue_broker = RedisListQueueBroker(f'{config.redis.dsn}/{BROKER_DB}')
+redis_list_queue_broker = RedisListQueueBroker(f'{config.redis.dsn}/{BROKER_DB}', queue_name=QUEUE_NAME)

@@ -1,7 +1,7 @@
 import secrets
 import string
 
-from src.core.interfaces.generator import IStringGenerator
+from src.core.shared_kernel.application.interfaces.generator import IStringGenerator
 
 
 class StringDigitCodeGenerator(IStringGenerator):

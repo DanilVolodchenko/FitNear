@@ -11,6 +11,7 @@ from src.core.components.user.application.dto import (
     CreateRegisterTokenDTO,
     CreateSettingsDTO,
     CreateUserDTO,
+    LoginUserDTO,
     RegisteredUserDTO,
     RegisterUserDTO,
 )
@@ -26,10 +27,10 @@ from src.core.components.user.application.interface import (
     IUserSaver,
 )
 from src.core.components.user.domain.value_object import RegistrationTokenType
-from src.core.interfaces.event_bus import IEventBus
-from src.core.interfaces.generator import IStringGenerator
-from src.core.interfaces.security import IHasher, IPwdHasher
-from src.core.interfaces.transaction import ITransactionManager
+from src.core.shared_kernel.application.interfaces.event_bus import IEventBus
+from src.core.shared_kernel.application.interfaces.generator import IStringGenerator
+from src.core.shared_kernel.application.interfaces.security import IHasher, IPwdHasher
+from src.core.shared_kernel.application.interfaces.transaction import ITransactionManager
 
 
 class RegisterUserUseCase:
@@ -119,7 +120,7 @@ class RegisterUserUseCase:
         return RegisteredUserDTO(registration_id=reg_token.id, expires_at=reg_token.expires_at)
 
 
-class ConfirmUseUseCase:
+class ConfirmUserUseCase:
     def __init__(
         self,
         config: Config,
@@ -150,9 +151,17 @@ class ConfirmUseUseCase:
         is_correct_code = await self._hasher.compare(hash_code, registration_token_dm.token_hash)
 
         if not is_correct_code:
-            raise error.ConfirmationCodeError('Confirmation code is not correct.')
+            raise error.ConfirmationCodeError('Incorrect confirmation code')
 
         await self._user_editor.confirm_user_email(registration_token_dm.user_id)
         await self._reg_token_editor.deactivate(registration_token_dm.id)
 
         await self._trx_manager.commit()
+
+
+class LoginUserUseCase:
+    async def __call__(self, login_user_dto: LoginUserDTO): ...
+
+
+class LogoutUserUseCase:
+    async def __call__(self): ...

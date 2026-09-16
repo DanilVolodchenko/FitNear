@@ -1,7 +1,7 @@
 import dataclasses
 from collections.abc import Sequence
 
-from src.core.interfaces.event_bus import Event
+from src.core.shared_kernel.application.interfaces.event_bus import Event
 
 
 @dataclasses.dataclass

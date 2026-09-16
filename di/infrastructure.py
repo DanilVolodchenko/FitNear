@@ -16,12 +16,12 @@ from src.core.components.user.application.interface import (
     IUserRemover,
     IUserSaver,
 )
-from src.core.interfaces.event_bus import IEventBus
-from src.core.interfaces.generator import IStringGenerator
-from src.core.interfaces.localization import ITranslator
-from src.core.interfaces.log import ILogger
-from src.core.interfaces.security import IHasher, IJWTToken, IPwdHasher
-from src.core.interfaces.transaction import ITransactionManager
+from src.core.shared_kernel.application.interfaces.event_bus import IEventBus
+from src.core.shared_kernel.application.interfaces.generator import IStringGenerator
+from src.core.shared_kernel.application.interfaces.localization import ITranslator
+from src.core.shared_kernel.application.interfaces.log import ILogger
+from src.core.shared_kernel.application.interfaces.security import IHasher, IJWTToken, IPwdHasher
+from src.core.shared_kernel.application.interfaces.transaction import ITransactionManager
 from src.infrastructure.communication import SMTPEmailSender
 from src.infrastructure.event_bus.taskiq import TaskiqEventBus
 from src.infrastructure.generator import StringDigitCodeGenerator

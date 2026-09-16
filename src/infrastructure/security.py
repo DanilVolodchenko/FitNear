@@ -8,7 +8,7 @@ import jwt
 from argon2 import PasswordHasher
 from argon2.exceptions import Argon2Error, InvalidHashError
 
-from src.core.interfaces.security import IHasher, IJWTToken, IPwdHasher
+from src.core.shared_kernel.application.interfaces.security import IHasher, IJWTToken, IPwdHasher
 
 
 class JWTToken(IJWTToken):

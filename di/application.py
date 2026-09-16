@@ -11,9 +11,9 @@ from src.core.components.user.application.interface import (
     IUserRemover,
     IUserSaver,
 )
-from src.core.components.user.application.use_case import ConfirmUseUseCase, RegisterUserUseCase
-from src.core.interfaces.security import IHasher
-from src.core.interfaces.transaction import ITransactionManager
+from src.core.components.user.application.use_case import ConfirmUserUseCase, RegisterUserUseCase
+from src.core.shared_kernel.application.interfaces.security import IHasher
+from src.core.shared_kernel.application.interfaces.transaction import ITransactionManager
 from src.infrastructure.event_bus.taskiq import TaskiqEventBus
 from src.infrastructure.generator import StringDigitCodeGenerator
 from src.infrastructure.security import Argon2PwdHasher, SHA256Hasher
@@ -60,8 +60,8 @@ class ApplicationProvider(Provider):
         reg_token_editor: IRegistrationTokenEditor,
         hasher: IHasher,
         trx_manager: ITransactionManager,
-    ) -> ConfirmUseUseCase:
-        return ConfirmUseUseCase(
+    ) -> ConfirmUserUseCase:
+        return ConfirmUserUseCase(
             config=config,
             user_reader=user_reader,
             user_editor=user_editor,

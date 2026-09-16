@@ -4,6 +4,12 @@ from src.core.components.user.application.dto import CreateRegisterTokenDTO, Cre
 from src.core.components.user.domain.entity import RegistrationTokenDM, SettingsDM, UserDM
 
 
+class IUserSaver(abc.ABC):
+    @abc.abstractmethod
+    async def create(self, user_dto: CreateUserDTO) -> UserDM:
+        """Create new user."""
+
+
 class IUserReader(abc.ABC):
     @abc.abstractmethod
     async def get_by_id(self, ident: int) -> UserDM | None:
@@ -12,12 +18,6 @@ class IUserReader(abc.ABC):
     @abc.abstractmethod
     async def get_by_email(self, email: str) -> UserDM | None:
         """Returns user by email."""
-
-
-class IUserSaver(abc.ABC):
-    @abc.abstractmethod
-    async def create(self, user_dto: CreateUserDTO) -> UserDM:
-        """Create new user."""
 
 
 class IUserEditor(abc.ABC):
@@ -38,6 +38,12 @@ class ISettingsSaver(abc.ABC):
         """Create user settings."""
 
 
+class IRegistrationTokenSaver(abc.ABC):
+    @abc.abstractmethod
+    async def create(self, token_dto: CreateRegisterTokenDTO) -> RegistrationTokenDM:
+        """Create registration token."""
+
+
 class IRegistrationTokenReader(abc.ABC):
     @abc.abstractmethod
     async def get_by_token_hash(self, token_hash: str) -> RegistrationTokenDM | None:
@@ -46,12 +52,6 @@ class IRegistrationTokenReader(abc.ABC):
     @abc.abstractmethod
     async def get_by_id(self, ident: int) -> RegistrationTokenDM | None:
         """Get token by id."""
-
-
-class IRegistrationTokenSaver(abc.ABC):
-    @abc.abstractmethod
-    async def create(self, token_dto: CreateRegisterTokenDTO) -> RegistrationTokenDM:
-        """Create registration token."""
 
 
 class IRegistrationTokenEditor(abc.ABC):

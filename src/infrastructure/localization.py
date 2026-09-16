@@ -5,7 +5,7 @@ from babel.messages.frontend import CommandLineInterface
 from starlette.requests import Request
 
 from config.config_path import I18N_PATH
-from src.core.interfaces.localization import ITranslator
+from src.core.shared_kernel.application.interfaces.localization import ITranslator
 
 
 class Translator(ITranslator):
