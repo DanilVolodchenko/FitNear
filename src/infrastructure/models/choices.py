@@ -7,6 +7,7 @@ class RegistrationTokenType(StrEnum):
 
 
 class AuthTokenType(StrEnum):
+    ACCESS = 'ACCESS'
     REFRESH = 'REFRESH'
 
 

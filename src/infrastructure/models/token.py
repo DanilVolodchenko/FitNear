@@ -23,11 +23,12 @@ class RegistrationToken(Base):
 class AuthToken(Base):
     __tablename__ = 'auth_tokens'
 
-    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), index=True)
     type: Mapped[AuthTokenType]
     token_hash: Mapped[str] = mapped_column(index=True)
     user_agent: Mapped[str | None]
     ip_address: Mapped[str | None]
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
