@@ -4,15 +4,15 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from di import ioc
-from src.core import error
+from src.core.exceptions.app_logic import AppError
 from src.core.shared_kernel.application.interfaces.localization import ITranslator
 from src.core.shared_kernel.application.interfaces.log import ILogger
 
 
 def register_fastapi_error_handlers(app: FastAPI) -> None:
 
-    @app.exception_handler(error.ApplicationError)
-    async def application_error_handler(request: Request, exc: error.ApplicationError) -> JSONResponse:
+    @app.exception_handler(AppError)
+    async def application_error_handler(request: Request, exc: AppError) -> JSONResponse:
         translator = await ioc.get(ITranslator)
         logger = await ioc.get(ILogger)
 
