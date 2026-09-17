@@ -1,18 +1,16 @@
 from sqlalchemy.ext.asyncio.session import AsyncSession
-from sqlalchemy.sql import text
+from sqlalchemy.sql import delete, insert, select, update
 
-from src.core.components.user.application.dto import CreateRegisterTokenDTO, CreateSettingsDTO, CreateUserDTO
+from src.core.components.user.application.dto import CreateSettingsDTO, CreateUserDTO
 from src.core.components.user.application.interface import (
-    IRegistrationTokenEditor,
-    IRegistrationTokenReader,
-    IRegistrationTokenSaver,
     ISettingsSaver,
     IUserEditor,
     IUserReader,
     IUserRemover,
     IUserSaver,
 )
-from src.core.components.user.domain.entity import RegistrationTokenDM, SettingsDM, UserDM
+from src.core.components.user.domain.entity import SettingsDM, UserDM
+from src.infrastructure.models.user import Settings, User
 
 
 class UserRepository(IUserReader, IUserSaver, IUserEditor, IUserRemover):
@@ -20,92 +18,64 @@ class UserRepository(IUserReader, IUserSaver, IUserEditor, IUserRemover):
         self._session = session
 
     async def get_by_id(self, ident: int) -> UserDM | None:
-        stmt = text('SELECT * FROM users WHERE id = :id')
+        stmt = select(User).where(User.id == ident)
 
-        result = await self._session.execute(
-            statement=stmt,
-            params={'id': ident},
-        )
-        entity = result.mappings().one_or_none()
+        result = await self._session.execute(statement=stmt)
+        user = result.scalar_one_or_none()
 
-        if not entity:
+        if not user:
             return None
 
-        return UserDM(
-            id=entity.id,
-            email=entity.email,
-            name=entity.name,
-            hashed_password=entity.hashed_password,
-            is_confirmed=entity.is_confirmed,
-            created_at=entity.created_at,
-            updated_at=entity.updated_at,
-        )
+        return self._to_dm(user)
 
     async def get_by_email(self, email: str) -> UserDM | None:
-        stmt = text('SELECT * FROM users WHERE email = :email')
+        stmt = select(User).where(User.email == email)
 
-        result = await self._session.execute(
-            statement=stmt,
-            params={'email': email},
-        )
-        entity = result.mappings().one_or_none()
+        result = await self._session.execute(statement=stmt)
+        user = result.scalar_one_or_none()
 
-        if not entity:
+        if not user:
             return None
 
-        return UserDM(
-            id=entity.id,
-            email=entity.email,
-            name=entity.name,
-            hashed_password=entity.hashed_password,
-            is_confirmed=entity.is_confirmed,
-            created_at=entity.created_at,
-            updated_at=entity.updated_at,
-        )
+        return self._to_dm(user)
 
     async def create(self, user_dto: CreateUserDTO) -> UserDM:
-        stmt = text(
-            """
-            INSERT INTO users (email, name, hashed_password, is_confirmed)
-            VALUES (:email, :name, :hashed_password, :is_confirmed)
-            RETURNING *;
-            """  # ruff: ignore[missing-trailing-comma]
+        stmt = (
+            insert(User)
+            .values(
+                email=user_dto.email,
+                name=user_dto.name,
+                hashed_password=user_dto.hashed_password,
+                is_confirmed=user_dto.is_confirmed,
+            )
+            .returning(User)
         )
 
-        result = await self._session.execute(
-            statement=stmt,
-            params={
-                'email': user_dto.email,
-                'name': user_dto.name,
-                'hashed_password': user_dto.hashed_password,
-                'is_confirmed': user_dto.is_confirmed,
-            },
-        )
+        result = await self._session.execute(statement=stmt)
+        user = result.scalar_one()
 
-        entity = result.mappings().one()
-
-        return UserDM(
-            id=entity.id,
-            email=entity.email,
-            name=entity.name,
-            hashed_password=entity.hashed_password,
-            is_confirmed=entity.is_confirmed,
-            created_at=entity.created_at,
-            updated_at=entity.updated_at,
-        )
+        return self._to_dm(user)
 
     async def confirm_user_email(self, user_id: int) -> None:
-        stmt = text('UPDATE users SET is_confirmed = true WHERE id = :id')
+        stmt = update(User).where(User.id == user_id).values(is_confirmed=True)
 
-        await self._session.execute(
-            statement=stmt,
-            params={'id': user_id},
-        )
+        await self._session.execute(statement=stmt)
 
     async def remove_by_email(self, email: str) -> None:
-        stmt = text('DELETE FROM users WHERE email = :email')
+        stmt = delete(User).where(User.email == email)
 
-        await self._session.execute(statement=stmt, params={'email': email})
+        await self._session.execute(stmt)
+
+    def _to_dm(self, user: User) -> UserDM:
+        return UserDM(
+            id=user.id,
+            email=user.email,
+            name=user.name,
+            hashed_password=user.hashed_password,
+            is_confirmed=user.is_confirmed,
+            created_at=user.created_at,
+            updated_at=user.updated_at,
+        )
 
 
 class SettingsRepository(ISettingsSaver):
@@ -113,99 +83,13 @@ class SettingsRepository(ISettingsSaver):
         self._session = session
 
     async def create(self, settings_dto: CreateSettingsDTO) -> SettingsDM:
-        stmt = text('INSERT INTO settings (language, theme, user_id) VALUES (:language, :theme, :user_id) RETURNING *')
-
-        result = await self._session.execute(
-            statement=stmt,
-            params={
-                'language': settings_dto.language,
-                'theme': settings_dto.theme,
-                'user_id': settings_dto.user_id,
-            },
+        stmt = (
+            insert(Settings)
+            .values(language=settings_dto.language, theme=settings_dto.theme, user_id=settings_dto.user_id)
+            .returning(Settings)
         )
 
-        entity = result.mappings().one()
+        result = await self._session.execute(stmt)
+        setting = result.scalar_one()
 
-        return SettingsDM(id=entity.id, language=entity.language, theme=entity.theme, user_id=entity.user_id)
-
-
-class RegistrationTokenRepository(IRegistrationTokenReader, IRegistrationTokenSaver, IRegistrationTokenEditor):
-    def __init__(self, session: AsyncSession) -> None:
-        self._session = session
-
-    async def get_by_token_hash(self, token_hash: str) -> RegistrationTokenDM | None:
-        stmt = text('SELECT * FROM registration_tokens WHERE token_hash = :token_hash')
-
-        result = await self._session.execute(statement=stmt, params={'token_hash': token_hash})
-
-        entity = result.mappings().one_or_none()
-
-        if not entity:
-            return None
-
-        return RegistrationTokenDM(
-            id=entity.id,
-            user_id=entity.user_id,
-            token_hash=entity.token_hash,
-            type=entity.type,
-            is_active=entity.is_active,
-            expires_at=entity.expires_at,
-            created_at=entity.created_at,
-        )
-
-    async def get_by_id(self, ident: int) -> RegistrationTokenDM | None:
-        stmt = text('SELECT * FROM registration_tokens WHERE id = :id')
-        result = await self._session.execute(statement=stmt, params={'id': ident})
-
-        entity = result.mappings().one_or_none()
-
-        if not entity:
-            return None
-
-        return RegistrationTokenDM(
-            id=entity.id,
-            user_id=entity.user_id,
-            token_hash=entity.token_hash,
-            type=entity.type,
-            is_active=entity.is_active,
-            expires_at=entity.expires_at,
-            created_at=entity.created_at,
-        )
-
-    async def create(self, token_dto: CreateRegisterTokenDTO) -> RegistrationTokenDM:
-        stmt = text(
-            """
-            INSERT INTO registration_tokens (user_id, token_hash, type, attempts, is_active, expires_at)
-            VALUES (:user_id, :token_hash, :type, :attempts, :is_active, :expires_at)
-            RETURNING *
-            """  # ruff: ignore[missing-trailing-comma]
-        )
-
-        result = await self._session.execute(
-            statement=stmt,
-            params={
-                'user_id': token_dto.user_id,
-                'token_hash': token_dto.token_hash,
-                'type': token_dto.type,
-                'attempts': token_dto.attempts,
-                'is_active': token_dto.is_active,
-                'expires_at': token_dto.expires_at,
-            },
-        )
-
-        entity = result.mappings().one()
-
-        return RegistrationTokenDM(
-            id=entity.id,
-            user_id=entity.user_id,
-            token_hash=entity.token_hash,
-            type=entity.type,
-            is_active=entity.is_active,
-            expires_at=entity.expires_at,
-            created_at=entity.created_at,
-        )
-
-    async def deactivate(self, token_id: int) -> None:
-        stmt = text('UPDATE registration_tokens SET is_active = false WHERE id = :id')
-
-        await self._session.execute(statement=stmt, params={'id': token_id})
+        return SettingsDM(id=setting.id, language=setting.language, theme=setting.theme, user_id=setting.user_id)

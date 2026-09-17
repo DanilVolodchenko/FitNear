@@ -26,7 +26,8 @@ from src.infrastructure.communication import SMTPEmailSender
 from src.infrastructure.event_bus.taskiq import TaskiqEventBus
 from src.infrastructure.generator import StringDigitCodeGenerator
 from src.infrastructure.localization import Translator
-from src.infrastructure.repositories.user import RegistrationTokenRepository, SettingsRepository, UserRepository
+from src.infrastructure.repositories.token import RegistrationTokenRepository
+from src.infrastructure.repositories.user import SettingsRepository, UserRepository
 from src.infrastructure.resources.database import new_session_maker
 from src.infrastructure.security import Argon2PwdHasher, JWTToken, SHA256Hasher
 
