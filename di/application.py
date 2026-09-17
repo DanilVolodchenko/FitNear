@@ -11,7 +11,7 @@ from src.core.components.user.application.interface import (
     IUserRemover,
     IUserSaver,
 )
-from src.core.components.user.application.use_case import ConfirmUserUseCase, RegisterUserUseCase
+from src.core.components.user.application.service import ConfirmUserService, RegisterUserService
 from src.core.shared_kernel.application.interfaces.security import IHasher
 from src.core.shared_kernel.application.interfaces.transaction import ITransactionManager
 from src.infrastructure.event_bus.taskiq import TaskiqEventBus
@@ -34,8 +34,8 @@ class ApplicationProvider(Provider):
         hasher: SHA256Hasher,
         trx_manager: ITransactionManager,
         event_bus: TaskiqEventBus,
-    ) -> RegisterUserUseCase:
-        return RegisterUserUseCase(
+    ) -> RegisterUserService:
+        return RegisterUserService(
             security_config=config.security,
             server_config=config.server,
             user_reader=user_reader,
@@ -60,8 +60,8 @@ class ApplicationProvider(Provider):
         reg_token_editor: IRegistrationTokenEditor,
         hasher: IHasher,
         trx_manager: ITransactionManager,
-    ) -> ConfirmUserUseCase:
-        return ConfirmUserUseCase(
+    ) -> ConfirmUserService:
+        return ConfirmUserService(
             config=config,
             user_reader=user_reader,
             user_editor=user_editor,

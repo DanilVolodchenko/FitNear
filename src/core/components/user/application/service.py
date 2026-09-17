@@ -1,7 +1,6 @@
 from datetime import UTC, datetime, timedelta
 
 from config import Config, SecurityConfig, ServerConfig
-from src.core import error
 from src.core.components.user.application.constants import (
     EMAIL_CONFIRMATION_CODE_LENGTH,
     EMAIL_CONFIRMATION_TOKEN_TIME_SEC,
@@ -27,13 +26,14 @@ from src.core.components.user.application.interface import (
     IUserSaver,
 )
 from src.core.components.user.domain.value_object import RegistrationTokenType
+from src.core.exceptions.app_logic import ConfirmationCodeError, FoundError, NotFoundError
 from src.core.shared_kernel.application.interfaces.event_bus import IEventBus
 from src.core.shared_kernel.application.interfaces.generator import IStringGenerator
 from src.core.shared_kernel.application.interfaces.security import IHasher, IPwdHasher
 from src.core.shared_kernel.application.interfaces.transaction import ITransactionManager
 
 
-class RegisterUserUseCase:
+class RegisterUserService:
     def __init__(
         self,
         security_config: SecurityConfig,
@@ -70,7 +70,7 @@ class RegisterUserUseCase:
                 await self._user_remover.remove_by_email(user_dm.email)
 
             else:
-                raise error.FoundError('User already exists')
+                raise FoundError('User already exists')
 
         hashed_pwd = await self._pwd_hasher.hash(reg_user_dto.password)
 
@@ -120,7 +120,7 @@ class RegisterUserUseCase:
         return RegisteredUserDTO(registration_id=reg_token.id, expires_at=reg_token.expires_at)
 
 
-class ConfirmUserUseCase:
+class ConfirmUserService:
     def __init__(
         self,
         config: Config,
@@ -144,14 +144,14 @@ class ConfirmUserUseCase:
         registration_token_dm = await self._reg_token_reader.get_by_id(registration_id)
 
         if not registration_token_dm:
-            raise error.NotFoundError('Registration token not found')
+            raise NotFoundError('Registration token not found')
 
         hash_code = await self._hasher.hash(confirm_user_dto.confirmation_code, self._config.security.hash_key)
 
         is_correct_code = await self._hasher.compare(hash_code, registration_token_dm.token_hash)
 
         if not is_correct_code:
-            raise error.ConfirmationCodeError('Incorrect confirmation code')
+            raise ConfirmationCodeError('Incorrect confirmation code')
 
         await self._user_editor.confirm_user_email(registration_token_dm.user_id)
         await self._reg_token_editor.deactivate(registration_token_dm.id)
@@ -159,9 +159,9 @@ class ConfirmUserUseCase:
         await self._trx_manager.commit()
 
 
-class LoginUserUseCase:
+class LoginUserService:
     async def __call__(self, login_user_dto: LoginUserDTO): ...
 
 
-class LogoutUserUseCase:
+class LogoutUserService:
     async def __call__(self): ...

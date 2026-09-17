@@ -9,11 +9,11 @@ from src.core.components.user.application.dto import (
     RegisterSettingsDTO,
     RegisterUserDTO,
 )
-from src.core.components.user.application.use_case import (
-    ConfirmUserUseCase,
-    LoginUserUseCase,
-    LogoutUserUseCase,
-    RegisterUserUseCase,
+from src.core.components.user.application.service import (
+    ConfirmUserService,
+    LoginUserService,
+    LogoutUserService,
+    RegisterUserService,
 )
 
 router = APIRouter(prefix='/auth', tags=['Auth'], route_class=DishkaRoute)
@@ -26,7 +26,7 @@ router = APIRouter(prefix='/auth', tags=['Auth'], route_class=DishkaRoute)
 )
 async def register(
     user: RegisterUserSchema,
-    register_user: FromDishka[RegisterUserUseCase],
+    register_user: FromDishka[RegisterUserService],
 ) -> RegisteredUserDTO:
 
     user_dto = RegisterUserDTO(
@@ -49,7 +49,7 @@ async def register(
 async def confirm(
     registration_id: int,
     user: ConfirmUserSchema,
-    confirm_user: FromDishka[ConfirmUserUseCase],
+    confirm_user: FromDishka[ConfirmUserService],
 ) -> None:
 
     confirm_user_dto = ConfirmUserDTO(confirmation_code=user.confirmation_code)
@@ -64,7 +64,7 @@ async def confirm(
 )
 async def login(
     user: LoginUserSchema,
-    login_user: FromDishka[LoginUserUseCase],
+    login_user: FromDishka[LoginUserService],
 ):
     login_user_dto = LoginUserDTO(email=user.email, password=user.password)
     return await login_user(login_user_dto)
@@ -76,6 +76,6 @@ async def login(
     name='Деавторизация пользователя',
 )
 async def logout(
-    logout_user: FromDishka[LogoutUserUseCase],
+    logout_user: FromDishka[LogoutUserService],
 ):
     await logout_user()
