@@ -14,5 +14,3 @@ class Base(DeclarativeBase):
             'pk': 'pk_%(table_name)s',
         },
     )
-
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
