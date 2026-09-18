@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from src.core.components.user.domain.value_object import LanguageType, RegistrationTokenType, ThemeType
+from src.core.components.user.domain.value_object import Language, RegistrationTokenType, Theme
 
 
 @dataclass(slots=True, frozen=True)
@@ -18,8 +18,8 @@ class UserDM:
 @dataclass(slots=True, frozen=True)
 class SettingsDM:
     id: int
-    language: LanguageType
-    theme: ThemeType
+    language: Language
+    theme: Theme
 
     user_id: int
 

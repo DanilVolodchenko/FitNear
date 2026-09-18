@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from src.core.components.user.domain.value_object import LanguageType, RegistrationTokenType, ThemeType
+from src.core.components.user.domain.value_object import Language, RegistrationTokenType, Theme
 
 
 @dataclass(frozen=True, slots=True)
@@ -25,8 +25,8 @@ class CreateUserDTO(BaseUserDTO):
 
 @dataclass(frozen=True, slots=True)
 class RegisterSettingsDTO:
-    language: LanguageType
-    theme: ThemeType
+    language: Language
+    theme: Theme
 
 
 @dataclass(frozen=True, slots=True)
@@ -55,7 +55,7 @@ class CreateRegisterTokenDTO:
 
 @dataclass(frozen=True, slots=True)
 class CreateSettingsDTO:
-    language: LanguageType
-    theme: ThemeType
+    language: Language
+    theme: Theme
 
     user_id: int

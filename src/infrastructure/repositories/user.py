@@ -31,7 +31,7 @@ class UserRepository(IUserReader, IUserSaver, IUserEditor, IUserRemover):
     async def get_by_email(self, email: str) -> UserDM | None:
         stmt = select(User).where(User.email == email)
 
-        result = await self._session.execute(statement=stmt)
+        result = await self._session.execute(stmt)
         user = result.scalar_one_or_none()
 
         if not user:

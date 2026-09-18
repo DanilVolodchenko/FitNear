@@ -101,4 +101,4 @@ class Settings(Base):
         nullable=False,
     )
 
-    user: Mapped[User] = relationship(back_populates='setting', single_parent=True)
+    user: Mapped[User] = relationship(back_populates='settings', single_parent=True)

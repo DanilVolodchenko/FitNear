@@ -23,4 +23,6 @@ class TaskiqEventBus(IEventBus):
             self._logger.warning('Handler for event={} not found', event)
 
         for handler in handlers:
-            await handler.kiq(**dataclasses.asdict(event))
+            params = dataclasses.asdict(event)
+
+            await handler.kiq(**params)

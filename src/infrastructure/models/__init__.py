@@ -1,5 +1,5 @@
 from src.infrastructure.models.base import Base
 from src.infrastructure.models.token import AuthToken, RegistrationToken
-from src.infrastructure.models.user import User
+from src.infrastructure.models.user import User, Settings
 
-__all__ = ['AuthToken', 'Base', 'RegistrationToken', 'User']
+__all__ = ['AuthToken', 'Base', 'RegistrationToken', 'User', 'Settings']

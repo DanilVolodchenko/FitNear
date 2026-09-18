@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr
 
-from src.core.components.user.domain.value_object import LanguageType, ThemeType
+from src.core.components.user.domain.value_object import Language, Theme
 
 
 class BaseUserSchema(BaseModel):
@@ -19,8 +19,8 @@ class LoginUserSchema(BaseUserSchema):
 
 
 class RegisterSettingsSchema(BaseModel):
-    language: LanguageType
-    theme: ThemeType
+    language: Language
+    theme: Theme
 
 
 class ConfirmUserSchema(BaseModel):

@@ -2,15 +2,15 @@ from enum import StrEnum
 
 
 class RegistrationTokenType(StrEnum):
-    EMAIL_CONFIRMATION = 'EMAIL_CONFIRMATION'
-    PASSWORD_RESET = 'PASSWORD_RESET'  # noqa: S105
+    EMAIL_CONFIRMATION = 'email_confirmation'
+    PASSWORD_RESET = 'password_reset'  # noqa: S105
 
 
-class LanguageType(StrEnum):
-    RU = 'RU'
-    EN = 'EN'
+class Language(StrEnum):
+    RU = 'ru'
+    EN = 'en'
 
 
-class ThemeType(StrEnum):
-    WHITE = 'WHITE'
-    BLACK = 'BLACK'
+class Theme(StrEnum):
+    WHITE = 'white'
+    BLACK = 'black'
