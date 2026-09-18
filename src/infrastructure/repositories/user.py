@@ -70,6 +70,7 @@ class UserRepository(IUserReader, IUserSaver, IUserEditor, IUserRemover):
         return UserDM(
             id=user.id,
             email=user.email,
+            role=user.role,
             name=user.name,
             hashed_password=user.hashed_password,
             is_confirmed=user.is_confirmed,

@@ -17,14 +17,14 @@ from src.core.components.user.application.interface import (
     IUserSaver,
 )
 from src.core.shared_kernel.application.interfaces.event_bus import IEventBus
-from src.core.shared_kernel.application.interfaces.generator import IStringGenerator
+from src.core.shared_kernel.application.interfaces.generator import IStringGenerator, IUUIDGenerator
 from src.core.shared_kernel.application.interfaces.localization import ITranslator
 from src.core.shared_kernel.application.interfaces.log import ILogger
 from src.core.shared_kernel.application.interfaces.security import IHasher, IJWTToken, IPwdHasher
 from src.core.shared_kernel.application.interfaces.transaction import ITransactionManager
 from src.infrastructure.communication import SMTPEmailSender
 from src.infrastructure.event_bus.taskiq import TaskiqEventBus
-from src.infrastructure.generator import StringDigitCodeGenerator
+from src.infrastructure.generator import StringDigitCodeGenerator, UUID4Generator
 from src.infrastructure.localization import Translator
 from src.infrastructure.repositories.token import RegistrationTokenRepository
 from src.infrastructure.repositories.user import SettingsRepository, UserRepository
@@ -86,6 +86,12 @@ class InfrastructureProvider(Provider):
         StringDigitCodeGenerator,
         scope=Scope.APP,
         provides=AnyOf[StringDigitCodeGenerator, IStringGenerator],
+    )
+
+    uuid_generator = provide(
+        UUID4Generator,
+        scope=Scope.APP,
+        provides=AnyOf[UUID4Generator, IUUIDGenerator],
     )
 
     taskiq_event_bus = provide(TaskiqEventBus, scope=Scope.APP, provides=AnyOf[TaskiqEventBus, IEventBus])

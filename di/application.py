@@ -11,7 +11,7 @@ from src.core.components.user.application.interface import (
     IUserRemover,
     IUserSaver,
 )
-from src.core.components.user.application.service import ConfirmUserService, RegisterUserService
+from src.core.components.user.application.service import ConfirmUserService, LoginUserService, RegisterUserService
 from src.core.shared_kernel.application.interfaces.security import IHasher
 from src.core.shared_kernel.application.interfaces.transaction import ITransactionManager
 from src.infrastructure.event_bus.taskiq import TaskiqEventBus
@@ -70,3 +70,5 @@ class ApplicationProvider(Provider):
             hasher=hasher,
             trx_manager=trx_manager,
         )
+
+    login_user_service = provide(LoginUserService, scope=Scope.REQUEST)

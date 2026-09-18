@@ -10,6 +10,7 @@ from src.core.components.user.application.dto import (
     CreateRegisterTokenDTO,
     CreateSettingsDTO,
     CreateUserDTO,
+    JWTTokenDTO,
     LoginUserDTO,
     RegisteredUserDTO,
     RegisterUserDTO,
@@ -25,11 +26,11 @@ from src.core.components.user.application.interface import (
     IUserRemover,
     IUserSaver,
 )
-from src.core.components.user.domain.value_object import RegistrationTokenType
+from src.core.components.user.domain.value_object import AuthTokenType, RegistrationTokenType
 from src.core.exceptions.app_logic import ConfirmationCodeError, FoundError, NotFoundError
 from src.core.shared_kernel.application.interfaces.event_bus import IEventBus
-from src.core.shared_kernel.application.interfaces.generator import IStringGenerator
-from src.core.shared_kernel.application.interfaces.security import IHasher, IPwdHasher
+from src.core.shared_kernel.application.interfaces.generator import IStringGenerator, IUUIDGenerator
+from src.core.shared_kernel.application.interfaces.security import IHasher, IJWTToken, IPwdHasher
 from src.core.shared_kernel.application.interfaces.transaction import ITransactionManager
 
 
@@ -160,7 +161,45 @@ class ConfirmUserService:
 
 
 class LoginUserService:
-    async def __call__(self, login_user_dto: LoginUserDTO): ...
+    def __init__(
+        self,
+        user_reader: IUserReader,
+        uuid_generator: IUUIDGenerator,
+        jwt_token: IJWTToken,
+        hasher: IHasher,
+    ) -> None:
+        self._user_reader = user_reader
+        self._uuid_generator = uuid_generator
+        self._jwt_token = jwt_token
+        self._hasher = hasher
+
+    async def __call__(self, login_user_dto: LoginUserDTO) -> JWTTokenDTO:
+        user_dm = await self._user_reader.get_by_email(login_user_dto.email)
+
+        if not user_dm or not user_dm.is_confirmed:
+            raise NotFoundError('User not found')
+
+        access_payload = {
+            'sub': user_dm.id,
+            'role': user_dm.role,
+            'type': AuthTokenType.ACCESS,
+            'exp': '',
+            'iat': '',
+            'jti': await self._uuid_generator(),
+        }
+        refresh_payload = {
+            'sub': user_dm.id,
+            'role': user_dm.role,
+            'type': AuthTokenType.ACCESS,
+            'exp': '',
+            'iat': '',
+            'jti': await self._uuid_generator(),
+        }
+
+        access_token = await self._jwt_token.encode(access_payload, secret_key='', algorithm='')
+        refresh_token = await self._jwt_token.encode(refresh_payload, secret_key='', algorithm='')
+
+        return JWTTokenDTO(access=access_token, refresh=refresh_token)
 
 
 class LogoutUserService:

@@ -1,13 +1,14 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from src.core.components.user.domain.value_object import Language, RegistrationTokenType, Theme
+from src.core.components.user.domain.value_object import Language, RegistrationTokenType, Theme, UserRole
 
 
 @dataclass(slots=True, frozen=True)
 class UserDM:
     id: int
     email: str
+    role: UserRole
     name: str
     hashed_password: str
     is_confirmed: bool

@@ -59,3 +59,9 @@ class CreateSettingsDTO:
     theme: Theme
 
     user_id: int
+
+
+@dataclass(frozen=True, slots=True)
+class JWTTokenDTO:
+    access: str
+    refresh: str
