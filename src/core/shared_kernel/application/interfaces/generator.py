@@ -1,7 +1,14 @@
-import abc
+from abc import ABC, abstractmethod
+from uuid import UUID
 
 
-class IStringGenerator(abc.ABC):
-    @abc.abstractmethod
+class IStringGenerator(ABC):
+    @abstractmethod
     async def __call__(self, length: int) -> str:
-        """Generage string with length."""
+        """Generate string with length."""
+
+
+class IUUIDGenerator(ABC):
+    @abstractmethod
+    async def __call__(self) -> UUID:
+        """Generate uuid."""
