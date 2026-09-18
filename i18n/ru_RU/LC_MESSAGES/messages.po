@@ -33,7 +33,13 @@ msgid "Internal Server Error"
 msgstr "Внутренняя ошибка сервера"
 
 msgid "Registration token not found"
-msgstr "Регистрационный номер не найден"
+msgstr "Регистрационный токен не найден"
+
+msgid "Registration token already used"
+msgstr "Регистрационный токен был использован"
 
 msgid "Incorrect confirmation code"
 msgstr "Неверный код подтверждения"
+
+msgid "Code has expired"
+msgstr "Срок действия кода истек"

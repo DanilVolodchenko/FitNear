@@ -16,3 +16,7 @@ class SendEmailError(AppError):
 
 class ConfirmationCodeError(AppError):
     """Confirmation token error."""
+
+
+class TokenExpiredError(AppError):
+    """Token expired error."""

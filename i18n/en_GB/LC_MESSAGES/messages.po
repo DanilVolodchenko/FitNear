@@ -34,5 +34,11 @@ msgstr "Internal Server Error"
 msgid "Registration token not found"
 msgstr "Registration token not found"
 
+msgid "Registration token already used"
+msgstr "Registration token already used"
+
 msgid "Incorrect confirmation code"
 msgstr "Incorrect confirmation code"
+
+msgid "Code has expired"
+msgstr "Code has expired"

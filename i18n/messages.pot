@@ -30,5 +30,11 @@ msgstr ""
 msgid "Registration token not found"
 msgstr ""
 
+msgid "Registration token already used"
+msgstr ""
+
 msgid "Incorrect confirmation code"
+msgstr ""
+
+msgid "Code has expired"
 msgstr ""

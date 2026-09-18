@@ -2,8 +2,10 @@ from datetime import UTC, datetime, timedelta
 
 from config import Config, SecurityConfig, ServerConfig
 from src.core.components.user.application.constants import (
+    ACCESS_TOKEN_EXP_TIME_SEC,
     EMAIL_CONFIRMATION_CODE_LENGTH,
-    EMAIL_CONFIRMATION_TOKEN_TIME_SEC,
+    EMAIL_CONFIRMATION_TOKEN_EXP_TIME_SEC,
+    REFRESH_TOKEN_EXP_TIME_SEC,
 )
 from src.core.components.user.application.dto import (
     ConfirmUserDTO,
@@ -27,7 +29,7 @@ from src.core.components.user.application.interface import (
     IUserSaver,
 )
 from src.core.components.user.domain.value_object import AuthTokenType, RegistrationTokenType
-from src.core.exceptions.app_logic import ConfirmationCodeError, FoundError, NotFoundError
+from src.core.exceptions.app_logic import ConfirmationCodeError, FoundError, NotFoundError, TokenExpiredError
 from src.core.shared_kernel.application.interfaces.event_bus import IEventBus
 from src.core.shared_kernel.application.interfaces.generator import IStringGenerator, IUUIDGenerator
 from src.core.shared_kernel.application.interfaces.security import IHasher, IJWTToken, IPwdHasher
@@ -96,7 +98,7 @@ class RegisterUserService:
 
         token_hash = await self._hasher.hash(registration_code, self._security_config.hash_key)
 
-        expires_at = datetime.now(tz=UTC) + timedelta(seconds=EMAIL_CONFIRMATION_TOKEN_TIME_SEC)
+        expires_at = datetime.now(tz=UTC) + timedelta(seconds=EMAIL_CONFIRMATION_TOKEN_EXP_TIME_SEC)
 
         reg_token = await self._reg_token_saver.create(
             CreateRegisterTokenDTO(
@@ -108,6 +110,10 @@ class RegisterUserService:
         )
 
         await self._trx_manager.commit()
+
+        from loguru import logger
+
+        logger.success(registration_code)
 
         await self._event_bus.publish(
             UserEmailConfirmationEvent(
@@ -147,6 +153,12 @@ class ConfirmUserService:
         if not registration_token_dm:
             raise NotFoundError('Registration token not found')
 
+        if not registration_token_dm.is_active:
+            raise NotFoundError('Registration token already used')
+
+        if registration_token_dm.expires_at < datetime.now(tz=UTC):
+            raise TokenExpiredError('Code has expired')
+
         hash_code = await self._hasher.hash(confirm_user_dto.confirmation_code, self._config.security.hash_key)
 
         is_correct_code = await self._hasher.compare(hash_code, registration_token_dm.token_hash)
@@ -163,11 +175,13 @@ class ConfirmUserService:
 class LoginUserService:
     def __init__(
         self,
+        security_config: SecurityConfig,
         user_reader: IUserReader,
         uuid_generator: IUUIDGenerator,
         jwt_token: IJWTToken,
         hasher: IHasher,
     ) -> None:
+        self._security_config = security_config
         self._user_reader = user_reader
         self._uuid_generator = uuid_generator
         self._jwt_token = jwt_token
@@ -179,25 +193,41 @@ class LoginUserService:
         if not user_dm or not user_dm.is_confirmed:
             raise NotFoundError('User not found')
 
+        current_time = datetime.now(tz=UTC)
+
+        access_token_expires_at = current_time + timedelta(seconds=ACCESS_TOKEN_EXP_TIME_SEC)
+        refresh_token_expires_at = current_time + timedelta(seconds=REFRESH_TOKEN_EXP_TIME_SEC)
+
+        access_token_jti = await self._uuid_generator()
+        refresh_token_jti = await self._uuid_generator()
+
         access_payload = {
             'sub': user_dm.id,
             'role': user_dm.role,
             'type': AuthTokenType.ACCESS,
-            'exp': '',
-            'iat': '',
-            'jti': await self._uuid_generator(),
+            'exp': access_token_expires_at,
+            'iat': current_time,
+            'jti': str(access_token_jti),
         }
         refresh_payload = {
             'sub': user_dm.id,
             'role': user_dm.role,
             'type': AuthTokenType.ACCESS,
-            'exp': '',
-            'iat': '',
-            'jti': await self._uuid_generator(),
+            'exp': refresh_token_expires_at,
+            'iat': current_time,
+            'jti': str(refresh_token_jti),
         }
 
-        access_token = await self._jwt_token.encode(access_payload, secret_key='', algorithm='')
-        refresh_token = await self._jwt_token.encode(refresh_payload, secret_key='', algorithm='')
+        access_token = await self._jwt_token.encode(
+            access_payload,
+            secret_key=self._security_config.jwt_secret_key,
+            algorithm=self._security_config.jwt_algorithm,
+        )
+        refresh_token = await self._jwt_token.encode(
+            refresh_payload,
+            secret_key=self._security_config.jwt_secret_key,
+            algorithm=self._security_config.jwt_algorithm,
+        )
 
         return JWTTokenDTO(access=access_token, refresh=refresh_token)
 

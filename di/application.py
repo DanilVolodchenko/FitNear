@@ -12,7 +12,8 @@ from src.core.components.user.application.interface import (
     IUserSaver,
 )
 from src.core.components.user.application.service import ConfirmUserService, LoginUserService, RegisterUserService
-from src.core.shared_kernel.application.interfaces.security import IHasher
+from src.core.shared_kernel.application.interfaces.generator import IUUIDGenerator
+from src.core.shared_kernel.application.interfaces.security import IHasher, IJWTToken
 from src.core.shared_kernel.application.interfaces.transaction import ITransactionManager
 from src.infrastructure.event_bus.taskiq import TaskiqEventBus
 from src.infrastructure.generator import StringDigitCodeGenerator
@@ -21,7 +22,7 @@ from src.infrastructure.security import Argon2PwdHasher, SHA256Hasher
 
 class ApplicationProvider(Provider):
     @provide(scope=Scope.REQUEST)
-    async def get_register_user_use_case(
+    async def get_register_user_service(
         self,
         config: Config,
         user_reader: IUserReader,
@@ -51,7 +52,7 @@ class ApplicationProvider(Provider):
         )
 
     @provide(scope=Scope.REQUEST)
-    async def get_confirm_user_use_case(
+    async def get_confirm_user_service(
         self,
         config: Config,
         user_reader: IUserReader,
@@ -71,4 +72,20 @@ class ApplicationProvider(Provider):
             trx_manager=trx_manager,
         )
 
-    login_user_service = provide(LoginUserService, scope=Scope.REQUEST)
+    @provide(scope=Scope.REQUEST)
+    async def get_login_user_service(
+        self,
+        config: Config,
+        user_reader: IUserReader,
+        uuid_generator: IUUIDGenerator,
+        jwt_token: IJWTToken,
+        hasher: IHasher,
+        trx_manager: ITransactionManager,
+    ) -> LoginUserService:
+        return LoginUserService(
+            security_config=config.security,
+            user_reader=user_reader,
+            uuid_generator=uuid_generator,
+            jwt_token=jwt_token,
+            hasher=hasher,
+        )
