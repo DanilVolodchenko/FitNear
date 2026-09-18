@@ -22,4 +22,5 @@ dependencies = [
     "taskiq[reload]>=0.12.4",
     "taskiq-redis>=1.2.3",
     "uvicorn>=0.46.0",
+    "alembic-postgresql-enum>=1.10.0",
 ]
