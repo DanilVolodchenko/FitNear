@@ -28,12 +28,13 @@ from src.core.components.user.application.interface import (
     IUserRemover,
     IUserSaver,
 )
-from src.core.components.user.domain.value_object import AuthTokenType, RegistrationTokenType
+from src.core.components.user.domain.value_object import RegistrationTokenType
 from src.core.exceptions.app_logic import ConfirmationCodeError, FoundError, NotFoundError, TokenExpiredError
 from src.core.shared_kernel.application.interfaces.event_bus import IEventBus
 from src.core.shared_kernel.application.interfaces.generator import IStringGenerator, IUUIDGenerator
 from src.core.shared_kernel.application.interfaces.security import IHasher, IJWTToken, IPwdHasher
 from src.core.shared_kernel.application.interfaces.transaction import ITransactionManager
+from src.core.shared_kernel.domain.value_object import AuthTokenType
 
 
 class RegisterUserService:
@@ -110,10 +111,6 @@ class RegisterUserService:
         )
 
         await self._trx_manager.commit()
-
-        from loguru import logger
-
-        logger.success(registration_code)
 
         await self._event_bus.publish(
             UserEmailConfirmationEvent(

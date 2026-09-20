@@ -12,11 +12,6 @@ class RegistrationTokenType(StrEnum):
     PASSWORD_RESET = 'password_reset'  # noqa: S105
 
 
-class AuthTokenType(StrEnum):
-    ACCESS = 'access'
-    REFRESH = 'refresh'
-
-
 class Language(StrEnum):
     RU = 'ru'
     EN = 'en'

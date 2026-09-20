@@ -1,11 +1,11 @@
-import abc
+from abc import ABC, abstractmethod
 from pathlib import Path
 
-from starlette.requests import Request
+from fastapi import Request
 
 
-class ITranslator(abc.ABC):
-    @abc.abstractmethod
+class ITranslator(ABC):
+    @abstractmethod
     def translate(self, text: str, lang_code: str) -> str:
         """
         Localize to certain language.
@@ -14,7 +14,7 @@ class ITranslator(abc.ABC):
         :returns: Translation string.
         """
 
-    @abc.abstractmethod
+    @abstractmethod
     def get_lang_code(self, request: Request) -> str:
         """
         Return lang_code from request obj.
@@ -22,7 +22,7 @@ class ITranslator(abc.ABC):
         :returns: Language code.
         """
 
-    @abc.abstractmethod
+    @abstractmethod
     def compile(self, i18n_path: Path) -> None:
         """
         Compile localization files.
@@ -30,7 +30,7 @@ class ITranslator(abc.ABC):
         :returns: None
         """
 
-    @abc.abstractmethod
+    @abstractmethod
     def init_new_language(self, lang_code: str) -> None:
         """
         Init new language translation.

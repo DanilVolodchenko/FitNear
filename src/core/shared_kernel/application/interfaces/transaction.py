@@ -1,7 +1,7 @@
-import abc
+from abc import ABC, abstractmethod
 
 
-class ITransactionManager(abc.ABC):
-    @abc.abstractmethod
+class ITransactionManager(ABC):
+    @abstractmethod
     async def commit(self) -> None:
         """Commit session."""
