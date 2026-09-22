@@ -28,6 +28,7 @@ def new_session_maker(psql_config: PostgresConfig) -> async_sessionmaker[AsyncSe
         connect_args={
             'connect_timeout': 5,
         },
+        echo=True,
     )
     return async_sessionmaker(
         engine,

@@ -28,7 +28,7 @@ class Argon2PwdHasher(IPwdHasher):
 
     async def verify(self, hash_password: str, password: str) -> bool:
         try:
-            await asyncio.to_thread(self.ph.verify, hash=password, password=password)
+            await asyncio.to_thread(self.ph.verify, hash=hash_password, password=password)
         except InvalidHashError, Argon2Error:
             return False
         return True
