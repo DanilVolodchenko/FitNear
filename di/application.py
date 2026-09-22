@@ -12,6 +12,7 @@ from src.core.components.user.application.interface import (
     IUserSaver,
 )
 from src.core.components.user.application.service import ConfirmUserService, LoginUserService, RegisterUserService
+from src.core.shared_kernel.application.interfaces.auth import IAuthTokenSaver
 from src.core.shared_kernel.application.interfaces.generator import IUUIDGenerator
 from src.core.shared_kernel.application.interfaces.security import IHasher, IJWTToken
 from src.core.shared_kernel.application.interfaces.transaction import ITransactionManager
@@ -81,6 +82,7 @@ class ApplicationProvider(Provider):
         uuid_generator: IUUIDGenerator,
         jwt_token: IJWTToken,
         hasher: IHasher,
+        auth_token_saver: IAuthTokenSaver,
         trx_manager: ITransactionManager,
     ) -> LoginUserService:
         return LoginUserService(
@@ -90,5 +92,6 @@ class ApplicationProvider(Provider):
             uuid_generator=uuid_generator,
             jwt_token=jwt_token,
             hasher=hasher,
+            auth_token_saver=auth_token_saver,
             trx_manager=trx_manager,
         )

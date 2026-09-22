@@ -16,6 +16,7 @@ from src.core.components.user.application.interface import (
     IUserRemover,
     IUserSaver,
 )
+from src.core.shared_kernel.application.interfaces.auth import IAuthTokenEditor, IAuthTokenReader, IAuthTokenSaver
 from src.core.shared_kernel.application.interfaces.event_bus import IEventBus
 from src.core.shared_kernel.application.interfaces.generator import IStringGenerator, IUUIDGenerator
 from src.core.shared_kernel.application.interfaces.localization import ITranslator
@@ -26,6 +27,7 @@ from src.infrastructure.communication import SMTPEmailSender
 from src.infrastructure.event_bus.taskiq import TaskiqEventBus
 from src.infrastructure.generator import StringDigitCodeGenerator, UUID4Generator
 from src.infrastructure.localization import Translator
+from src.infrastructure.repositories.auth import AuthTokenRepository
 from src.infrastructure.repositories.token import RegistrationTokenRepository
 from src.infrastructure.repositories.user import SettingsRepository, UserRepository
 from src.infrastructure.resources.database import new_session_maker
@@ -67,7 +69,17 @@ class InfrastructureProvider(Provider):
     registration_token_repository = provide(
         RegistrationTokenRepository,
         scope=Scope.REQUEST,
-        provides=AnyOf[IRegistrationTokenReader, IRegistrationTokenSaver, IRegistrationTokenEditor],
+        provides=AnyOf[
+            RegistrationTokenRepository,
+            IRegistrationTokenReader,
+            IRegistrationTokenSaver,
+            IRegistrationTokenEditor,
+        ],
+    )
+    auth_token_repository = provide(
+        AuthTokenRepository,
+        scope=Scope.REQUEST,
+        provides=AnyOf[AuthTokenRepository, IAuthTokenSaver, IAuthTokenEditor, IAuthTokenReader],
     )
 
     jwt_token = provide(JWTToken, scope=Scope.APP, provides=AnyOf[JWTToken, IJWTToken])
