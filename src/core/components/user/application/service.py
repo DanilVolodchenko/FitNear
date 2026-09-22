@@ -28,6 +28,7 @@ from src.core.components.user.application.interface import (
     IUserRemover,
     IUserSaver,
 )
+from src.core.components.user.domain.entity import UserDM
 from src.core.components.user.domain.value_object import RegistrationTokenType
 from src.core.exceptions.app_logic import (
     ConfirmationCodeError,
@@ -36,6 +37,8 @@ from src.core.exceptions.app_logic import (
     NotFoundError,
     TokenExpiredError,
 )
+from src.core.shared_kernel.application.dto.token import CreateAuthTokenDTO
+from src.core.shared_kernel.application.interfaces.auth import IAuthTokenSaver
 from src.core.shared_kernel.application.interfaces.event_bus import IEventBus
 from src.core.shared_kernel.application.interfaces.generator import IStringGenerator, IUUIDGenerator
 from src.core.shared_kernel.application.interfaces.security import IHasher, IJWTToken, IPwdHasher
@@ -184,6 +187,7 @@ class LoginUserService:
         uuid_generator: IUUIDGenerator,
         jwt_token: IJWTToken,
         hasher: IHasher,
+        auth_token_saver: IAuthTokenSaver,
         trx_manager: ITransactionManager,
     ) -> None:
         self._security_config = security_config
@@ -192,54 +196,84 @@ class LoginUserService:
         self._uuid_generator = uuid_generator
         self._jwt_token = jwt_token
         self._hasher = hasher
+        self._auth_token_saver = auth_token_saver
         self._trx_manager = trx_manager
 
     async def __call__(self, login_user_dto: LoginUserDTO) -> JWTTokenDTO:
         user_dm = await self._user_reader.get_by_email(login_user_dto.email)
 
         if not user_dm or not user_dm.is_confirmed:
-            raise NotFoundError('User not found')
+            raise CredentialsError('Invalid credentials')
 
         if not await self._pwd_hasher.verify(user_dm.hashed_password, login_user_dto.password):
             raise CredentialsError('Invalid credentials')
 
         current_time = datetime.now(tz=UTC)
 
-        access_token_expires_at = current_time + timedelta(seconds=ACCESS_TOKEN_EXP_TIME_SEC)
-        refresh_token_expires_at = current_time + timedelta(seconds=REFRESH_TOKEN_EXP_TIME_SEC)
-
-        access_token_jti = await self._uuid_generator()
-        refresh_token_jti = await self._uuid_generator()
-
-        access_payload = {
-            'sub': user_dm.id,
-            'role': user_dm.role,
-            'type': AuthTokenType.ACCESS,
-            'exp': access_token_expires_at,
-            'iat': current_time,
-            'jti': str(access_token_jti),
-        }
-        refresh_payload = {
-            'sub': user_dm.id,
-            'role': user_dm.role,
-            'type': AuthTokenType.ACCESS,
-            'exp': refresh_token_expires_at,
-            'iat': current_time,
-            'jti': str(refresh_token_jti),
-        }
-
-        access_token = await self._jwt_token.encode(
-            access_payload,
-            secret_key=self._security_config.jwt_secret_key,
-            algorithm=self._security_config.jwt_algorithm,
+        access_token, access_token_dto = await self._create_token(
+            user_dm,
+            AuthTokenType.ACCESS,
+            ip_address=login_user_dto.ip_address,
+            user_agent=login_user_dto.user_agent,
+            expires_at=current_time + timedelta(seconds=ACCESS_TOKEN_EXP_TIME_SEC),
+            issued_at=current_time,
         )
-        refresh_token = await self._jwt_token.encode(
-            refresh_payload,
-            secret_key=self._security_config.jwt_secret_key,
-            algorithm=self._security_config.jwt_algorithm,
+        refresh_token, refresh_token_dto = await self._create_token(
+            user_dm,
+            AuthTokenType.REFRESH,
+            ip_address=login_user_dto.ip_address,
+            user_agent=login_user_dto.user_agent,
+            expires_at=current_time + timedelta(seconds=REFRESH_TOKEN_EXP_TIME_SEC),
+            issued_at=current_time,
         )
+
+        await self._auth_token_saver.create(access_token_dto)
+        await self._auth_token_saver.create(refresh_token_dto)
+
+        await self._trx_manager.commit()
 
         return JWTTokenDTO(access=access_token, refresh=refresh_token)
+
+    async def _create_token(
+        self,
+        user_dm: UserDM,
+        token_type: AuthTokenType,
+        *,
+        ip_address: str | None,
+        user_agent: str | None,
+        expires_at: datetime,
+        issued_at: datetime,
+    ) -> tuple[str, CreateAuthTokenDTO]:
+
+        jti = await self._uuid_generator()
+
+        payload = {
+            'sub': user_dm.id,
+            'role': user_dm.role,
+            'type': token_type,
+            'exp': expires_at,
+            'iat': issued_at,
+            'jti': str(jti),
+        }
+
+        jwt_token = await self._jwt_token.encode(
+            payload,
+            secret_key=self._security_config.jwt_secret_key,
+            algorithm=self._security_config.jwt_algorithm,
+        )
+
+        token_dto = CreateAuthTokenDTO(
+            type=token_type,
+            jti=jti,
+            token_hash=await self._hasher.hash(jwt_token, self._security_config.hash_key),
+            user_agent=user_agent,
+            ip_address=ip_address,
+            family_id=None,
+            expires_at=expires_at,
+            user_id=user_dm.id,
+        )
+
+        return jwt_token, token_dto
 
 
 class LogoutUserService:

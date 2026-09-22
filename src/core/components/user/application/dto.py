@@ -43,6 +43,8 @@ class ConfirmUserDTO:
 @dataclass(frozen=True, slots=True)
 class LoginUserDTO(BaseUserDTO):
     password: str
+    ip_address: str | None
+    user_agent: str | None
 
 
 @dataclass(frozen=True, slots=True)

@@ -12,11 +12,11 @@ class IAuthTokenSaver(ABC):
 
 class IAuthTokenReader(ABC):
     @abstractmethod
-    async def get_by_id(self, ident: int) -> AuthTokenDM:
-        """Returns auth token domain model."""
+    async def get_by_id(self, ident: int) -> AuthTokenDM | None:
+        """Returns auth token domain model by ident."""
 
 
 class IAuthTokenEditor(ABC):
     @abstractmethod
     async def deactivate_by_id(self, ident: int) -> None:
-        """Deactivate token."""
+        """Deactivate token by ident."""
