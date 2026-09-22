@@ -19,4 +19,8 @@ class ConfirmationCodeError(AppError):
 
 
 class TokenExpiredError(AppError):
-    """Token expired error."""
+    """Token expired."""
+
+
+class CredentialsError(AppError):
+    """Credentials error."""

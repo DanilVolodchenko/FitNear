@@ -77,6 +77,7 @@ class ApplicationProvider(Provider):
         self,
         config: Config,
         user_reader: IUserReader,
+        pwd_hasher: Argon2PwdHasher,
         uuid_generator: IUUIDGenerator,
         jwt_token: IJWTToken,
         hasher: IHasher,
@@ -85,7 +86,9 @@ class ApplicationProvider(Provider):
         return LoginUserService(
             security_config=config.security,
             user_reader=user_reader,
+            pwd_hasher=pwd_hasher,
             uuid_generator=uuid_generator,
             jwt_token=jwt_token,
             hasher=hasher,
+            trx_manager=trx_manager,
         )

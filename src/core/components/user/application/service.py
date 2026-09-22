@@ -29,7 +29,13 @@ from src.core.components.user.application.interface import (
     IUserSaver,
 )
 from src.core.components.user.domain.value_object import RegistrationTokenType
-from src.core.exceptions.app_logic import ConfirmationCodeError, FoundError, NotFoundError, TokenExpiredError
+from src.core.exceptions.app_logic import (
+    ConfirmationCodeError,
+    CredentialsError,
+    FoundError,
+    NotFoundError,
+    TokenExpiredError,
+)
 from src.core.shared_kernel.application.interfaces.event_bus import IEventBus
 from src.core.shared_kernel.application.interfaces.generator import IStringGenerator, IUUIDGenerator
 from src.core.shared_kernel.application.interfaces.security import IHasher, IJWTToken, IPwdHasher
@@ -174,21 +180,28 @@ class LoginUserService:
         self,
         security_config: SecurityConfig,
         user_reader: IUserReader,
+        pwd_hasher: IPwdHasher,
         uuid_generator: IUUIDGenerator,
         jwt_token: IJWTToken,
         hasher: IHasher,
+        trx_manager: ITransactionManager,
     ) -> None:
         self._security_config = security_config
         self._user_reader = user_reader
+        self._pwd_hasher = pwd_hasher
         self._uuid_generator = uuid_generator
         self._jwt_token = jwt_token
         self._hasher = hasher
+        self._trx_manager = trx_manager
 
     async def __call__(self, login_user_dto: LoginUserDTO) -> JWTTokenDTO:
         user_dm = await self._user_reader.get_by_email(login_user_dto.email)
 
         if not user_dm or not user_dm.is_confirmed:
             raise NotFoundError('User not found')
+
+        if not await self._pwd_hasher.verify(user_dm.hashed_password, login_user_dto.password):
+            raise CredentialsError('Invalid credentials')
 
         current_time = datetime.now(tz=UTC)
 

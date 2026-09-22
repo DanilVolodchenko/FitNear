@@ -43,3 +43,6 @@ msgstr "Неверный код подтверждения"
 
 msgid "Code has expired"
 msgstr "Срок действия кода истек"
+
+msgid "Invalid credentials"
+msgstr "Некорректные данные"

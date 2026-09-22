@@ -42,3 +42,6 @@ msgstr "Incorrect confirmation code"
 
 msgid "Code has expired"
 msgstr "Code has expired"
+
+msgid "Invalid credentials"
+msgstr "Invalid credentials"
