@@ -1,9 +1,7 @@
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
 from fastapi import APIRouter, Request, Response, status
 
-from src.controller.http.v1.auth.schemas.request import ConfirmUserRequest, LoginUserRequest, RegisterUserRequest
-from src.controller.http.v1.auth.schemas.response import LoginUserResponse, RegisteredUserResponse
-from src.core.components.user.application.constants import REFRESH_TOKEN_EXP_TIME_SEC, ACCESS_TOKEN_EXP_TIME_SEC
+from src.core.components.user.application.constants import REFRESH_TOKEN_EXP_TIME_SEC
 from src.core.components.user.application.dto import (
     ConfirmUserDTO,
     LoginUserDTO,
@@ -16,6 +14,8 @@ from src.core.components.user.application.service import (
     LogoutUserService,
     RegisterUserService,
 )
+from src.presentation.http.v1.auth.schemas.request import ConfirmUserRequest, LoginUserRequest, RegisterUserRequest
+from src.presentation.http.v1.auth.schemas.response import LoginUserResponse, RegisteredUserResponse
 
 router = APIRouter(prefix='/auth', tags=['Auth'], route_class=DishkaRoute)
 
@@ -59,7 +59,7 @@ async def confirm(
 ) -> None:
 
     confirm_user_dto = ConfirmUserDTO(confirmation_code=user.confirmation_code)
-    ACCESS_TOKEN_EXP_TIME_SEC
+
     return await confirm_user(registration_id, confirm_user_dto)
 
 

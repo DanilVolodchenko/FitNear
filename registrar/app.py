@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from config import FastApiConfig
 from registrar.error_handlers import register_fastapi_error_handlers
 from registrar.lifespan import lifespan
-from src.controller.http import router
+from src.presentation.http import router
 
 
 def register_fastapi_app(fastapi_config: FastApiConfig) -> FastAPI:
