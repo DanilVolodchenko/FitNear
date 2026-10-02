@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from datetime import datetime
+from uuid import UUID
 
-from src.core.components.user.domain.value_object import Language, RegistrationTokenType, Theme
+from src.core.components.user.domain.value_object import Language, Theme
 
 
 @dataclass(frozen=True, slots=True)
@@ -17,13 +18,6 @@ class RegisterUserDTO(BaseUserDTO):
 
 
 @dataclass(frozen=True, slots=True)
-class CreateUserDTO(BaseUserDTO):
-    name: str
-    hashed_password: str
-    is_confirmed: bool = False
-
-
-@dataclass(frozen=True, slots=True)
 class RegisterSettingsDTO:
     language: Language
     theme: Theme
@@ -31,7 +25,7 @@ class RegisterSettingsDTO:
 
 @dataclass(frozen=True, slots=True)
 class RegisteredUserDTO:
-    registration_id: int
+    registration_id: UUID
     expires_at: datetime
 
 
@@ -45,22 +39,6 @@ class LoginUserDTO(BaseUserDTO):
     password: str
     ip_address: str | None
     user_agent: str | None
-
-
-@dataclass(frozen=True, slots=True)
-class CreateRegisterTokenDTO:
-    user_id: int
-    token_hash: str
-    type: RegistrationTokenType
-    expires_at: datetime
-
-
-@dataclass(frozen=True, slots=True)
-class CreateSettingsDTO:
-    language: Language
-    theme: Theme
-
-    user_id: int
 
 
 @dataclass(frozen=True, slots=True)

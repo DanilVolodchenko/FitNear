@@ -1,9 +1,9 @@
 """
 empty message
 
-Revision ID: 36fbf85d877a
+Revision ID: 7afd9f7002e4
 Revises:
-Create Date: 2026-09-18 11:21:48.909369
+Create Date: 2026-10-02 09:03:44.365444
 """
 
 from collections.abc import Sequence
@@ -13,7 +13,7 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '36fbf85d877a'
+revision: str = '7afd9f7002e4'
 down_revision: str | Sequence[str] | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -27,7 +27,7 @@ def upgrade() -> None:
     sa.Enum('admin', 'stuff', 'client', name='user_role_enum').create(op.get_bind())
     op.create_table(
         'permissions',
-        sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column('id', sa.UUID(), nullable=False),
         sa.Column('name', sa.String(), nullable=False),
         sa.Column('description', sa.String(), nullable=True),
         sa.PrimaryKeyConstraint('id', name=op.f('pk_permissions')),
@@ -35,7 +35,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_permissions_name'), 'permissions', ['name'], unique=True)
     op.create_table(
         'roles',
-        sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column('id', sa.UUID(), nullable=False),
         sa.Column('name', sa.String(), nullable=False),
         sa.Column('description', sa.String(), nullable=True),
         sa.PrimaryKeyConstraint('id', name=op.f('pk_roles')),
@@ -43,7 +43,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_roles_name'), 'roles', ['name'], unique=True)
     op.create_table(
         'users',
-        sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column('id', sa.UUID(), nullable=False),
         sa.Column('email', sa.String(length=256), nullable=False),
         sa.Column('name', sa.String(length=512), nullable=False),
         sa.Column('hashed_password', sa.String(), nullable=False),
@@ -61,8 +61,8 @@ def upgrade() -> None:
     op.create_table(
         'roles_permissions',
         sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column('role_id', sa.Integer(), nullable=True),
-        sa.Column('permission_id', sa.Integer(), nullable=True),
+        sa.Column('role_id', sa.UUID(), nullable=True),
+        sa.Column('permission_id', sa.UUID(), nullable=True),
         sa.ForeignKeyConstraint(
             ['permission_id'],
             ['permissions.id'],
@@ -80,7 +80,7 @@ def upgrade() -> None:
     )
     op.create_table(
         'settings',
-        sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column('id', sa.UUID(), nullable=False),
         sa.Column(
             'language',
             postgresql.ENUM('ru', 'en', name='settings_language_enum', create_type=False),
@@ -91,7 +91,7 @@ def upgrade() -> None:
             postgresql.ENUM('white', 'black', 'system', name='settings_theme_enum', create_type=False),
             nullable=False,
         ),
-        sa.Column('user_id', sa.Integer(), nullable=False),
+        sa.Column('user_id', sa.UUID(), nullable=False),
         sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_settings_user_id_users'), ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('id', name=op.f('pk_settings')),
     )
@@ -99,8 +99,8 @@ def upgrade() -> None:
     op.create_table(
         'users_permissions',
         sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column('user_id', sa.Integer(), nullable=True),
-        sa.Column('permission_id', sa.Integer(), nullable=True),
+        sa.Column('user_id', sa.UUID(), nullable=True),
+        sa.Column('permission_id', sa.UUID(), nullable=True),
         sa.ForeignKeyConstraint(
             ['permission_id'],
             ['permissions.id'],
@@ -119,8 +119,8 @@ def upgrade() -> None:
     op.create_table(
         'users_roles',
         sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column('user_id', sa.Integer(), nullable=True),
-        sa.Column('role_id', sa.Integer(), nullable=True),
+        sa.Column('user_id', sa.UUID(), nullable=True),
+        sa.Column('role_id', sa.UUID(), nullable=True),
         sa.ForeignKeyConstraint(
             ['role_id'],
             ['roles.id'],

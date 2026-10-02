@@ -1,7 +1,8 @@
 from datetime import datetime
+from uuid import UUID
 
+import sqlalchemy as sa
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Table, UniqueConstraint, func
-from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.infrastructure.models.base import Base
@@ -12,8 +13,8 @@ users_roles = Table(
     'users_roles',
     Base.metadata,
     Column('id', Integer, primary_key=True, autoincrement=True),
-    Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE')),
-    Column('role_id', Integer, ForeignKey('roles.id', ondelete='CASCADE')),
+    Column('user_id', sa.UUID, ForeignKey('users.id', ondelete='CASCADE')),
+    Column('role_id', sa.UUID, ForeignKey('roles.id', ondelete='CASCADE')),
     UniqueConstraint('user_id', 'role_id'),
 )
 
@@ -21,8 +22,8 @@ users_permissions = Table(
     'users_permissions',
     Base.metadata,
     Column('id', Integer, primary_key=True, autoincrement=True),
-    Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE')),
-    Column('permission_id', Integer, ForeignKey('permissions.id', ondelete='CASCADE')),
+    Column('user_id', sa.UUID, ForeignKey('users.id', ondelete='CASCADE')),
+    Column('permission_id', sa.UUID, ForeignKey('permissions.id', ondelete='CASCADE')),
     UniqueConstraint('user_id', 'permission_id'),
 )
 
@@ -30,8 +31,8 @@ roles_permissions = Table(
     'roles_permissions',
     Base.metadata,
     Column('id', Integer, primary_key=True, autoincrement=True),
-    Column('role_id', Integer, ForeignKey('roles.id', ondelete='CASCADE')),
-    Column('permission_id', Integer, ForeignKey('permissions.id', ondelete='CASCADE')),
+    Column('role_id', sa.UUID, ForeignKey('roles.id', ondelete='CASCADE')),
+    Column('permission_id', sa.UUID, ForeignKey('permissions.id', ondelete='CASCADE')),
     UniqueConstraint('role_id', 'permission_id'),
 )
 
@@ -39,12 +40,12 @@ roles_permissions = Table(
 class User(Base):
     __tablename__ = 'users'
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[UUID] = mapped_column(sa.UUID, primary_key=True)
     email: Mapped[str] = mapped_column(String(256), unique=True, nullable=False, index=True)
     name: Mapped[str] = mapped_column(String(512), nullable=False)
     hashed_password: Mapped[str] = mapped_column(nullable=False)
     role: Mapped[UserRole] = mapped_column(
-        SQLEnum(UserRole, name='user_role_enum', values_callable=get_enum_values),
+        sa.Enum(UserRole, name='user_role_enum', values_callable=get_enum_values),
         default=UserRole.CLIENT,
         nullable=False,
     )
@@ -60,7 +61,7 @@ class User(Base):
 class Role(Base):
     __tablename__ = 'roles'
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[UUID] = mapped_column(sa.UUID, primary_key=True)
     name: Mapped[str] = mapped_column(index=True, unique=True)
     description: Mapped[str] = mapped_column(nullable=True, default=None)
 
@@ -71,7 +72,7 @@ class Role(Base):
 class Permission(Base):
     __tablename__ = 'permissions'
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[UUID] = mapped_column(sa.UUID, primary_key=True)
     name: Mapped[str] = mapped_column(index=True, unique=True)
     description: Mapped[str] = mapped_column(nullable=True, default=None)
 
@@ -82,19 +83,19 @@ class Permission(Base):
 class Settings(Base):
     __tablename__ = 'settings'
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[UUID] = mapped_column(sa.UUID, primary_key=True)
     language: Mapped[Language] = mapped_column(
-        SQLEnum(Language, name='settings_language_enum', values_callable=get_enum_values),
+        sa.Enum(Language, name='settings_language_enum', values_callable=get_enum_values),
         default=Language.RU,
         nullable=False,
     )
     theme: Mapped[Theme] = mapped_column(
-        SQLEnum(Theme, name='settings_theme_enum', values_callable=get_enum_values),
+        sa.Enum(Theme, name='settings_theme_enum', values_callable=get_enum_values),
         default=Theme.SYSTEM,
         nullable=False,
     )
 
-    user_id: Mapped[int] = mapped_column(
+    user_id: Mapped[UUID] = mapped_column(
         ForeignKey('users.id', ondelete='CASCADE'),
         index=True,
         unique=True,

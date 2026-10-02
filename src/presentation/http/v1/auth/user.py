@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
 from fastapi import APIRouter, Request, Response, status
 
@@ -49,11 +51,11 @@ async def register(
 
 @router.post(
     '/confirm/{registration_id}',
-    status_code=status.HTTP_204_NO_CONTENT,
+    status_code=status.HTTP_200_OK,
     name='Подтверждение почты пользователя.',
 )
 async def confirm(
-    registration_id: int,
+    registration_id: UUID,
     user: ConfirmUserRequest,
     confirm_user: FromDishka[ConfirmUserService],
 ) -> None:
@@ -105,5 +107,5 @@ async def login(
 )
 async def logout(
     logout_user: FromDishka[LogoutUserService],
-):
+) -> None:
     await logout_user()

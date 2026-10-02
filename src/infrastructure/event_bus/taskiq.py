@@ -25,8 +25,4 @@ class TaskiqEventBus(IEventBus):
         for handler in handlers:
             params = dataclasses.asdict(event)
 
-            from loguru import logger
-
-            logger.success(params)
-
             await handler.kiq(**params)

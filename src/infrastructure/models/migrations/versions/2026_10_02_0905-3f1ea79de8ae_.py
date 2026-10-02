@@ -1,9 +1,9 @@
 """
 empty message
 
-Revision ID: a5c2dd87ca21
-Revises: 36fbf85d877a
-Create Date: 2026-09-18 11:22:16.348774
+Revision ID: 3f1ea79de8ae
+Revises: 7afd9f7002e4
+Create Date: 2026-10-02 09:05:09.002034
 """
 
 from collections.abc import Sequence
@@ -13,8 +13,8 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = 'a5c2dd87ca21'
-down_revision: str | Sequence[str] | None = '36fbf85d877a'
+revision: str = '3f1ea79de8ae'
+down_revision: str | Sequence[str] | None = '7afd9f7002e4'
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
@@ -26,23 +26,23 @@ def upgrade() -> None:
     sa.Enum('email_confirmation', 'password_reset', name='registration_token_type_enum').create(op.get_bind())
     op.create_table(
         'auth_tokens',
-        sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column('id', sa.UUID(), nullable=False),
         sa.Column(
             'type',
             postgresql.ENUM('access', 'refresh', name='auth_token_type_enum', create_type=False),
             nullable=False,
         ),
-        sa.Column('jti', sa.Uuid(), nullable=False),
+        sa.Column('jti', sa.UUID(), nullable=False),
         sa.Column('token_hash', sa.String(length=256), nullable=False),
         sa.Column('user_agent', sa.String(length=512), nullable=True),
         sa.Column('ip_address', sa.String(length=64), nullable=True),
         sa.Column('is_active', sa.Boolean(), nullable=False),
-        sa.Column('family_id', sa.Uuid(), nullable=True),
+        sa.Column('family_id', sa.UUID(), nullable=True),
         sa.Column('expires_at', sa.DateTime(timezone=True), nullable=False),
         sa.Column('revoked_at', sa.DateTime(timezone=True), nullable=True),
         sa.Column('last_used_at', sa.DateTime(timezone=True), nullable=True),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-        sa.Column('user_id', sa.Integer(), nullable=False),
+        sa.Column('user_id', sa.UUID(), nullable=False),
         sa.ForeignKeyConstraint(
             ['user_id'],
             ['users.id'],
@@ -57,7 +57,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_auth_tokens_user_id'), 'auth_tokens', ['user_id'], unique=False)
     op.create_table(
         'registration_tokens',
-        sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column('id', sa.UUID(), nullable=False),
         sa.Column('token_hash', sa.String(), nullable=False),
         sa.Column('used_at', sa.DateTime(), nullable=True),
         sa.Column(
@@ -74,7 +74,7 @@ def upgrade() -> None:
         sa.Column('is_active', sa.Boolean(), nullable=False),
         sa.Column('expires_at', sa.DateTime(timezone=True), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-        sa.Column('user_id', sa.Integer(), nullable=False),
+        sa.Column('user_id', sa.UUID(), nullable=False),
         sa.ForeignKeyConstraint(
             ['user_id'],
             ['users.id'],

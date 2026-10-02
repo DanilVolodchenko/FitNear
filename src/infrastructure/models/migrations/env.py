@@ -1,7 +1,7 @@
 from logging.config import fileConfig
 
 # Issue: https://github.com/sqlalchemy/alembic/issues/886
-import alembic_postgresql_enum  # noqa
+import alembic_postgresql_enum  # noqa: F401
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 

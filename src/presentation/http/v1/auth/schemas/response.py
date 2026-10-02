@@ -1,10 +1,11 @@
 from datetime import datetime
+from uuid import UUID
 
 from pydantic import BaseModel
 
 
 class RegisteredUserResponse(BaseModel):
-    registration_id: int
+    registration_id: UUID
     expires_at: datetime
 
 

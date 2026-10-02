@@ -6,7 +6,13 @@ from config import PostgresConfig
 
 
 async def create_db_if_not_exists(psql_config: PostgresConfig) -> None:
-    conn_info = f'dbname=postgres host={psql_config.host} port={psql_config.port} user={psql_config.username} password={psql_config.pwd}'
+    conn_info = (
+        'dbname=postgres '
+        f'host={psql_config.host} '
+        f'port={psql_config.port} '
+        f'user={psql_config.username} '
+        f'password={psql_config.pwd}'
+    )
 
     async with await psycopg.AsyncConnection.connect(conn_info, autocommit=True) as connection:
         async with connection.cursor() as cursor:

@@ -87,6 +87,7 @@ ignore = [
     'PLW0108',
     # identical by code != identical by meaning
     'SIM114',
+    'SIM117',
     # awful things, never use.
     # It makes runtime work differently from typechecker
     'TC001',
@@ -99,6 +100,7 @@ ignore = [
     'CPY001',
     'PLR0917',
     'RUF002',
+    'INP001',
 ]
 
 [lint.per-file-ignores]

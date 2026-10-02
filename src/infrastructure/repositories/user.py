@@ -1,7 +1,8 @@
+from dataclasses import asdict
+
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy.sql import delete, insert, select, update
 
-from src.core.components.user.application.dto import CreateSettingsDTO, CreateUserDTO
 from src.core.components.user.application.interface import (
     ISettingsSaver,
     IUserEditor,
@@ -13,9 +14,14 @@ from src.core.components.user.domain.entity import SettingsDM, UserDM
 from src.infrastructure.models.user import Settings, User
 
 
-class UserRepository(IUserReader, IUserSaver, IUserEditor, IUserRemover):
+class UserRepository(IUserSaver, IUserReader, IUserEditor, IUserRemover):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
+
+    async def save(self, user_dm: UserDM) -> None:
+        stmt = insert(User).values(**asdict(user_dm))
+
+        await self._session.execute(statement=stmt)
 
     async def get_by_id(self, ident: int) -> UserDM | None:
         stmt = select(User).where(User.id == ident)
@@ -36,23 +42,6 @@ class UserRepository(IUserReader, IUserSaver, IUserEditor, IUserRemover):
 
         if not user:
             return None
-
-        return self._to_dm(user)
-
-    async def create(self, user_dto: CreateUserDTO) -> UserDM:
-        stmt = (
-            insert(User)
-            .values(
-                email=user_dto.email,
-                name=user_dto.name,
-                hashed_password=user_dto.hashed_password,
-                is_confirmed=user_dto.is_confirmed,
-            )
-            .returning(User)
-        )
-
-        result = await self._session.execute(statement=stmt)
-        user = result.scalar_one()
 
         return self._to_dm(user)
 
@@ -83,14 +72,7 @@ class SettingsRepository(ISettingsSaver):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def create(self, settings_dto: CreateSettingsDTO) -> SettingsDM:
-        stmt = (
-            insert(Settings)
-            .values(language=settings_dto.language, theme=settings_dto.theme, user_id=settings_dto.user_id)
-            .returning(Settings)
-        )
+    async def save(self, settings_dm: SettingsDM) -> None:
+        stmt = insert(Settings).values(**asdict(settings_dm))
 
-        result = await self._session.execute(stmt)
-        setting = result.scalar_one()
-
-        return SettingsDM(id=setting.id, language=setting.language, theme=setting.theme, user_id=setting.user_id)
+        await self._session.execute(stmt)

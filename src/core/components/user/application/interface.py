@@ -1,18 +1,18 @@
 from abc import ABC, abstractmethod
+from uuid import UUID
 
-from src.core.components.user.application.dto import CreateRegisterTokenDTO, CreateSettingsDTO, CreateUserDTO
 from src.core.components.user.domain.entity import RegistrationTokenDM, SettingsDM, UserDM
 
 
 class IUserSaver(ABC):
     @abstractmethod
-    async def create(self, user_dto: CreateUserDTO) -> UserDM:
-        """Create new user."""
+    async def save(self, user_dm: UserDM) -> None:
+        """Save new user."""
 
 
 class IUserReader(ABC):
     @abstractmethod
-    async def get_by_id(self, ident: int) -> UserDM | None:
+    async def get_by_id(self, ident: UUID) -> UserDM | None:
         """Returns user by id."""
 
     @abstractmethod
@@ -22,7 +22,7 @@ class IUserReader(ABC):
 
 class IUserEditor(ABC):
     @abstractmethod
-    async def confirm_user_email(self, user_id: int) -> None:
+    async def confirm_user_email(self, user_id: UUID) -> None:
         """Confirm user email."""
 
 
@@ -34,14 +34,14 @@ class IUserRemover(ABC):
 
 class ISettingsSaver(ABC):
     @abstractmethod
-    async def create(self, settings_dto: CreateSettingsDTO) -> SettingsDM:
+    async def save(self, settings_dm: SettingsDM) -> None:
         """Create user settings."""
 
 
 class IRegistrationTokenSaver(ABC):
     @abstractmethod
-    async def create(self, token_dto: CreateRegisterTokenDTO) -> RegistrationTokenDM:
-        """Create registration token."""
+    async def save(self, token_dm: RegistrationTokenDM) -> None:
+        """Save registration token."""
 
 
 class IRegistrationTokenReader(ABC):
@@ -50,11 +50,11 @@ class IRegistrationTokenReader(ABC):
         """Get token by token_hash."""
 
     @abstractmethod
-    async def get_by_id(self, ident: int) -> RegistrationTokenDM | None:
+    async def get_by_id(self, ident: UUID) -> RegistrationTokenDM | None:
         """Get token by id."""
 
 
 class IRegistrationTokenEditor(ABC):
     @abstractmethod
-    async def deactivate(self, token_id: int) -> None:
+    async def deactivate(self, ident: UUID) -> None:
         """Deactivate token."""

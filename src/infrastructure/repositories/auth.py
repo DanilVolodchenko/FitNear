@@ -1,7 +1,8 @@
+from dataclasses import asdict
+
 from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from src.core.shared_kernel.application.dto.token import CreateAuthTokenDTO
 from src.core.shared_kernel.application.interfaces.auth import IAuthTokenEditor, IAuthTokenReader, IAuthTokenSaver
 from src.core.shared_kernel.domain.entity import AuthTokenDM
 from src.infrastructure.models.token import AuthToken
@@ -11,26 +12,10 @@ class AuthTokenRepository(IAuthTokenSaver, IAuthTokenReader, IAuthTokenEditor):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def create(self, create_token_dto: CreateAuthTokenDTO) -> AuthTokenDM:
-        stmt = (
-            insert(AuthToken)
-            .values(
-                type=create_token_dto.type,
-                jti=create_token_dto.jti,
-                token_hash=create_token_dto.token_hash,
-                user_agent=create_token_dto.user_agent,
-                ip_address=create_token_dto.ip_address,
-                family_id=create_token_dto.family_id,
-                expires_at=create_token_dto.expires_at,
-                user_id=create_token_dto.user_id,
-            )
-            .returning(AuthToken)
-        )
+    async def add(self, auth_token_dm: AuthTokenDM) -> None:
+        stmt = insert(AuthToken).values(**asdict(auth_token_dm))
 
-        result = await self._session.execute(stmt)
-        auth_token = result.scalar_one()
-
-        return self._to_dm(auth_token)
+        await self._session.execute(stmt)
 
     async def get_by_id(self, ident: int) -> AuthTokenDM | None:
         stmt = select(AuthToken).where(AuthToken.id == ident)

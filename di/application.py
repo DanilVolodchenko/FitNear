@@ -16,7 +16,7 @@ from src.core.shared_kernel.application.interfaces.auth import IAuthTokenSaver
 from src.core.shared_kernel.application.interfaces.security import IHasher, IJWTToken
 from src.core.shared_kernel.application.interfaces.transaction import ITransactionManager
 from src.infrastructure.event_bus.taskiq import TaskiqEventBus
-from src.infrastructure.generator import StringDigitCodeGenerator, UUID4Generator
+from src.infrastructure.generator import StringDigitCodeGenerator, UUID4Generator, UUID7Generator
 from src.infrastructure.security import Argon2PwdHasher, SHA256Hasher
 
 
@@ -31,6 +31,7 @@ class ApplicationProvider(Provider):
         settings_saver: ISettingsSaver,
         reg_token_saver: IRegistrationTokenSaver,
         pwd_hasher: Argon2PwdHasher,
+        uuid_generator: UUID7Generator,
         string_generator: StringDigitCodeGenerator,
         hasher: SHA256Hasher,
         trx_manager: ITransactionManager,
@@ -45,6 +46,7 @@ class ApplicationProvider(Provider):
             settings_saver=settings_saver,
             reg_token_saver=reg_token_saver,
             pwd_hasher=pwd_hasher,
+            uuid_generator=uuid_generator,
             string_generator=string_generator,
             hasher=hasher,
             trx_manager=trx_manager,
@@ -55,7 +57,6 @@ class ApplicationProvider(Provider):
     async def get_confirm_user_service(
         self,
         config: Config,
-        user_reader: IUserReader,
         user_editor: IUserEditor,
         reg_token_reader: IRegistrationTokenReader,
         reg_token_editor: IRegistrationTokenEditor,
@@ -64,7 +65,6 @@ class ApplicationProvider(Provider):
     ) -> ConfirmUserService:
         return ConfirmUserService(
             config=config,
-            user_reader=user_reader,
             user_editor=user_editor,
             reg_token_reader=reg_token_reader,
             reg_token_editor=reg_token_editor,
@@ -78,7 +78,8 @@ class ApplicationProvider(Provider):
         config: Config,
         user_reader: IUserReader,
         pwd_hasher: Argon2PwdHasher,
-        uuid_generator: UUID4Generator,
+        uuid4_generator: UUID4Generator,
+        uuid7_generator: UUID7Generator,
         jwt_token: IJWTToken,
         hasher: IHasher,
         auth_token_saver: IAuthTokenSaver,
@@ -88,7 +89,8 @@ class ApplicationProvider(Provider):
             security_config=config.security,
             user_reader=user_reader,
             pwd_hasher=pwd_hasher,
-            uuid_generator=uuid_generator,
+            uuid4_generator=uuid4_generator,
+            uuid7_generator=uuid7_generator,
             jwt_token=jwt_token,
             hasher=hasher,
             auth_token_saver=auth_token_saver,

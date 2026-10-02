@@ -15,4 +15,4 @@ class CreateAuthTokenDTO:
     family_id: UUID | None
     expires_at: datetime
 
-    user_id: int
+    user_id: UUID

@@ -1,4 +1,5 @@
 from datetime import UTC, datetime, timedelta
+from uuid import UUID
 
 from config import Config, SecurityConfig, ServerConfig
 from src.core.components.user.application.constants import (
@@ -9,9 +10,6 @@ from src.core.components.user.application.constants import (
 )
 from src.core.components.user.application.dto import (
     ConfirmUserDTO,
-    CreateRegisterTokenDTO,
-    CreateSettingsDTO,
-    CreateUserDTO,
     JWTTokenDTO,
     LoginUserDTO,
     RegisteredUserDTO,
@@ -28,7 +26,7 @@ from src.core.components.user.application.interface import (
     IUserRemover,
     IUserSaver,
 )
-from src.core.components.user.domain.entity import UserDM
+from src.core.components.user.domain.entity import RegistrationTokenDM, SettingsDM, UserDM
 from src.core.components.user.domain.value_object import RegistrationTokenType
 from src.core.exceptions.app_logic import (
     ConfirmationCodeError,
@@ -37,13 +35,14 @@ from src.core.exceptions.app_logic import (
     NotFoundError,
     TokenExpiredError,
 )
-from src.core.shared_kernel.application.dto.token import CreateAuthTokenDTO
 from src.core.shared_kernel.application.interfaces.auth import IAuthTokenSaver
 from src.core.shared_kernel.application.interfaces.event_bus import IEventBus
 from src.core.shared_kernel.application.interfaces.generator import IStringGenerator, IUUIDGenerator
 from src.core.shared_kernel.application.interfaces.security import IHasher, IJWTToken, IPwdHasher
 from src.core.shared_kernel.application.interfaces.transaction import ITransactionManager
+from src.core.shared_kernel.domain.entity import AuthTokenDM
 from src.core.shared_kernel.domain.value_object import AuthTokenType
+from src.infrastructure.models.value_object import UserRole
 
 
 class RegisterUserService:
@@ -57,6 +56,7 @@ class RegisterUserService:
         settings_saver: ISettingsSaver,
         reg_token_saver: IRegistrationTokenSaver,
         pwd_hasher: IPwdHasher,
+        uuid_generator: IUUIDGenerator,
         string_generator: IStringGenerator,
         hasher: IHasher,
         trx_manager: ITransactionManager,
@@ -70,6 +70,7 @@ class RegisterUserService:
         self._settings_saver = settings_saver
         self._reg_token_saver = reg_token_saver
         self._pwd_hasher = pwd_hasher
+        self._uuid_generator = uuid_generator
         self._string_generator = string_generator
         self._hasher = hasher
         self._trx_manager = trx_manager
@@ -87,37 +88,40 @@ class RegisterUserService:
 
         hashed_pwd = await self._pwd_hasher.hash(reg_user_dto.password)
 
-        user_dm = await self._user_saver.create(
-            CreateUserDTO(
-                email=reg_user_dto.email,
-                name=reg_user_dto.name,
-                hashed_password=hashed_pwd,
-                is_confirmed=False,
-            ),
+        user_id = self._uuid_generator.generate()
+        user_dm = UserDM.create(
+            ident=user_id,
+            email=reg_user_dto.email,
+            role=UserRole.CLIENT,
+            name=reg_user_dto.name,
+            hashed_pwd=hashed_pwd,
         )
 
-        await self._settings_saver.create(
-            CreateSettingsDTO(
-                language=reg_user_dto.settings.language,
-                theme=reg_user_dto.settings.theme,
-                user_id=user_dm.id,
-            ),
+        settings_id = self._uuid_generator.generate()
+        settings_dm = SettingsDM.create(
+            ident=settings_id,
+            language=reg_user_dto.settings.language,
+            theme=reg_user_dto.settings.theme,
+            user_id=user_id,
         )
 
         registration_code = self._string_generator.generate(EMAIL_CONFIRMATION_CODE_LENGTH)
-
         token_hash = await self._hasher.hash(registration_code, self._security_config.hash_key)
 
         expires_at = datetime.now(tz=UTC) + timedelta(seconds=EMAIL_CONFIRMATION_TOKEN_EXP_TIME_SEC)
 
-        reg_token = await self._reg_token_saver.create(
-            CreateRegisterTokenDTO(
-                user_id=user_dm.id,
-                token_hash=token_hash,
-                type=RegistrationTokenType.EMAIL_CONFIRMATION,
-                expires_at=expires_at,
-            ),
+        reg_token_id = self._uuid_generator.generate()
+        reg_token_dm = RegistrationTokenDM.create(
+            ident=reg_token_id,
+            token_hash=token_hash,
+            token_type=RegistrationTokenType.EMAIL_CONFIRMATION,
+            expires_at=expires_at,
+            user_id=user_id,
         )
+
+        await self._user_saver.save(user_dm)
+        await self._settings_saver.save(settings_dm)
+        await self._reg_token_saver.save(reg_token_dm)
 
         await self._trx_manager.commit()
 
@@ -130,14 +134,13 @@ class RegisterUserService:
             ),
         )
 
-        return RegisteredUserDTO(registration_id=reg_token.id, expires_at=reg_token.expires_at)
+        return RegisteredUserDTO(registration_id=reg_token_dm.id, expires_at=reg_token_dm.expires_at)
 
 
 class ConfirmUserService:
     def __init__(
         self,
         config: Config,
-        user_reader: IUserReader,
         user_editor: IUserEditor,
         reg_token_reader: IRegistrationTokenReader,
         reg_token_editor: IRegistrationTokenEditor,
@@ -145,14 +148,13 @@ class ConfirmUserService:
         trx_manager: ITransactionManager,
     ) -> None:
         self._config = config
-        self._user_reader = user_reader
         self._user_editor = user_editor
         self._reg_token_reader = reg_token_reader
         self._reg_token_editor = reg_token_editor
         self._hasher = hasher
         self._trx_manager = trx_manager
 
-    async def __call__(self, registration_id: int, confirm_user_dto: ConfirmUserDTO) -> None:
+    async def __call__(self, registration_id: UUID, confirm_user_dto: ConfirmUserDTO) -> None:
 
         registration_token_dm = await self._reg_token_reader.get_by_id(registration_id)
 
@@ -184,7 +186,8 @@ class LoginUserService:
         security_config: SecurityConfig,
         user_reader: IUserReader,
         pwd_hasher: IPwdHasher,
-        uuid_generator: IUUIDGenerator,
+        uuid4_generator: IUUIDGenerator,
+        uuid7_generator: IUUIDGenerator,
         jwt_token: IJWTToken,
         hasher: IHasher,
         auth_token_saver: IAuthTokenSaver,
@@ -193,7 +196,8 @@ class LoginUserService:
         self._security_config = security_config
         self._user_reader = user_reader
         self._pwd_hasher = pwd_hasher
-        self._uuid_generator = uuid_generator
+        self._uuid4_generator = uuid4_generator
+        self._uuid7_generator = uuid7_generator
         self._jwt_token = jwt_token
         self._hasher = hasher
         self._auth_token_saver = auth_token_saver
@@ -210,7 +214,7 @@ class LoginUserService:
 
         current_time = datetime.now(tz=UTC)
 
-        access_token, access_token_dto = await self._create_token(
+        access_token, access_token_dm = await self._create_token(
             user_dm,
             AuthTokenType.ACCESS,
             ip_address=login_user_dto.ip_address,
@@ -218,7 +222,7 @@ class LoginUserService:
             expires_at=current_time + timedelta(seconds=ACCESS_TOKEN_EXP_TIME_SEC),
             issued_at=current_time,
         )
-        refresh_token, refresh_token_dto = await self._create_token(
+        refresh_token, refresh_token_dm = await self._create_token(
             user_dm,
             AuthTokenType.REFRESH,
             ip_address=login_user_dto.ip_address,
@@ -227,8 +231,8 @@ class LoginUserService:
             issued_at=current_time,
         )
 
-        await self._auth_token_saver.create(access_token_dto)
-        await self._auth_token_saver.create(refresh_token_dto)
+        await self._auth_token_saver.add(access_token_dm)
+        await self._auth_token_saver.add(refresh_token_dm)
 
         await self._trx_manager.commit()
 
@@ -243,12 +247,12 @@ class LoginUserService:
         user_agent: str | None,
         expires_at: datetime,
         issued_at: datetime,
-    ) -> tuple[str, CreateAuthTokenDTO]:
+    ) -> tuple[str, AuthTokenDM]:
 
-        jti = self._uuid_generator.generate()
+        jti = self._uuid4_generator.generate()
 
         payload = {
-            'sub': user_dm.id,
+            'sub': str(user_dm.id),
             'role': user_dm.role,
             'type': token_type,
             'exp': expires_at,
@@ -262,10 +266,13 @@ class LoginUserService:
             algorithm=self._security_config.jwt_algorithm,
         )
 
-        token_dto = CreateAuthTokenDTO(
-            type=token_type,
+        auth_token_id = self._uuid7_generator.generate()
+        auth_token_hash = await self._hasher.hash(jwt_token, self._security_config.hash_key)
+        auth_token_dm = AuthTokenDM.create(
+            ident=auth_token_id,
+            token_type=token_type,
             jti=jti,
-            token_hash=await self._hasher.hash(jwt_token, self._security_config.hash_key),
+            token_hash=auth_token_hash,
             user_agent=user_agent,
             ip_address=ip_address,
             family_id=None,
@@ -273,8 +280,8 @@ class LoginUserService:
             user_id=user_dm.id,
         )
 
-        return jwt_token, token_dto
+        return jwt_token, auth_token_dm
 
 
 class LogoutUserService:
-    async def __call__(self): ...
+    async def __call__(self) -> None: ...

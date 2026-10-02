@@ -1,7 +1,9 @@
+from dataclasses import asdict
+from uuid import UUID
+
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy.sql import insert, select, update
 
-from src.core.components.user.application.dto import CreateRegisterTokenDTO
 from src.core.components.user.application.interface import (
     IRegistrationTokenEditor,
     IRegistrationTokenReader,
@@ -11,9 +13,14 @@ from src.core.components.user.domain.entity import RegistrationTokenDM
 from src.infrastructure.models.token import RegistrationToken
 
 
-class RegistrationTokenRepository(IRegistrationTokenReader, IRegistrationTokenSaver, IRegistrationTokenEditor):
+class RegistrationTokenRepository(IRegistrationTokenSaver, IRegistrationTokenReader, IRegistrationTokenEditor):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
+
+    async def save(self, token_dm: RegistrationTokenDM) -> None:
+        stmt = insert(RegistrationToken).values(**asdict(token_dm))
+
+        await self._session.execute(stmt)
 
     async def get_by_token_hash(self, token_hash: str) -> RegistrationTokenDM | None:
         stmt = select(RegistrationToken).where(RegistrationToken.token_hash == token_hash)
@@ -26,7 +33,7 @@ class RegistrationTokenRepository(IRegistrationTokenReader, IRegistrationTokenSa
 
         return self._to_dm(registration_token)
 
-    async def get_by_id(self, ident: int) -> RegistrationTokenDM | None:
+    async def get_by_id(self, ident: UUID) -> RegistrationTokenDM | None:
         stmt = select(RegistrationToken).where(RegistrationToken.id == ident)
 
         result = await self._session.execute(stmt)
@@ -37,25 +44,8 @@ class RegistrationTokenRepository(IRegistrationTokenReader, IRegistrationTokenSa
 
         return self._to_dm(registration_token)
 
-    async def create(self, token_dto: CreateRegisterTokenDTO) -> RegistrationTokenDM:
-        stmt = (
-            insert(RegistrationToken)
-            .values(
-                user_id=token_dto.user_id,
-                token_hash=token_dto.token_hash,
-                type=token_dto.type,
-                expires_at=token_dto.expires_at,
-            )
-            .returning(RegistrationToken)
-        )
-
-        result = await self._session.execute(stmt)
-        registration_token = result.scalar_one()
-
-        return self._to_dm(registration_token)
-
-    async def deactivate(self, ident: int) -> None:
-        stmt = update(RegistrationToken).where(RegistrationToken.id == ident).values(is_active=True)
+    async def deactivate(self, ident: UUID) -> None:
+        stmt = update(RegistrationToken).where(RegistrationToken.id == ident).values(is_active=False)
 
         await self._session.execute(stmt)
 
