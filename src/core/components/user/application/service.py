@@ -104,7 +104,7 @@ class RegisterUserService:
             ),
         )
 
-        registration_code = await self._string_generator(EMAIL_CONFIRMATION_CODE_LENGTH)
+        registration_code = self._string_generator.generate(EMAIL_CONFIRMATION_CODE_LENGTH)
 
         token_hash = await self._hasher.hash(registration_code, self._security_config.hash_key)
 
@@ -245,7 +245,7 @@ class LoginUserService:
         issued_at: datetime,
     ) -> tuple[str, CreateAuthTokenDTO]:
 
-        jti = await self._uuid_generator()
+        jti = self._uuid_generator.generate()
 
         payload = {
             'sub': user_dm.id,

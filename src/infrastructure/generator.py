@@ -1,16 +1,20 @@
-import asyncio
 import secrets
 import string
-from uuid import UUID, uuid4
+from uuid import UUID, uuid4, uuid7
 
 from src.core.shared_kernel.application.interfaces.generator import IStringGenerator, IUUIDGenerator
 
 
 class StringDigitCodeGenerator(IStringGenerator):
-    async def __call__(self, length: int) -> str:
+    def generate(self, length: int) -> str:
         return ''.join([secrets.choice(string.digits) for _ in range(length)])
 
 
 class UUID4Generator(IUUIDGenerator):
-    async def __call__(self) -> UUID:
-        return await asyncio.to_thread(uuid4)
+    def generate(self) -> UUID:
+        return uuid4()
+
+
+class UUID7Generator(IUUIDGenerator):
+    def generate(self) -> UUID:
+        return uuid7()

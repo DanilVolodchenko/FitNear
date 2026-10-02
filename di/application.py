@@ -13,11 +13,10 @@ from src.core.components.user.application.interface import (
 )
 from src.core.components.user.application.service import ConfirmUserService, LoginUserService, RegisterUserService
 from src.core.shared_kernel.application.interfaces.auth import IAuthTokenSaver
-from src.core.shared_kernel.application.interfaces.generator import IUUIDGenerator
 from src.core.shared_kernel.application.interfaces.security import IHasher, IJWTToken
 from src.core.shared_kernel.application.interfaces.transaction import ITransactionManager
 from src.infrastructure.event_bus.taskiq import TaskiqEventBus
-from src.infrastructure.generator import StringDigitCodeGenerator
+from src.infrastructure.generator import StringDigitCodeGenerator, UUID4Generator
 from src.infrastructure.security import Argon2PwdHasher, SHA256Hasher
 
 
@@ -79,7 +78,7 @@ class ApplicationProvider(Provider):
         config: Config,
         user_reader: IUserReader,
         pwd_hasher: Argon2PwdHasher,
-        uuid_generator: IUUIDGenerator,
+        uuid_generator: UUID4Generator,
         jwt_token: IJWTToken,
         hasher: IHasher,
         auth_token_saver: IAuthTokenSaver,

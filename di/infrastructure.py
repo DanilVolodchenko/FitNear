@@ -18,14 +18,14 @@ from src.core.components.user.application.interface import (
 )
 from src.core.shared_kernel.application.interfaces.auth import IAuthTokenEditor, IAuthTokenReader, IAuthTokenSaver
 from src.core.shared_kernel.application.interfaces.event_bus import IEventBus
-from src.core.shared_kernel.application.interfaces.generator import IStringGenerator, IUUIDGenerator
+from src.core.shared_kernel.application.interfaces.generator import IStringGenerator
 from src.core.shared_kernel.application.interfaces.localization import ITranslator
 from src.core.shared_kernel.application.interfaces.log import ILogger
 from src.core.shared_kernel.application.interfaces.security import IHasher, IJWTToken, IPwdHasher
 from src.core.shared_kernel.application.interfaces.transaction import ITransactionManager
 from src.infrastructure.communication import SMTPEmailSender
 from src.infrastructure.event_bus.taskiq import TaskiqEventBus
-from src.infrastructure.generator import StringDigitCodeGenerator, UUID4Generator
+from src.infrastructure.generator import StringDigitCodeGenerator, UUID4Generator, UUID7Generator
 from src.infrastructure.localization import Translator
 from src.infrastructure.repositories.auth import AuthTokenRepository
 from src.infrastructure.repositories.token import RegistrationTokenRepository
@@ -100,10 +100,7 @@ class InfrastructureProvider(Provider):
         provides=AnyOf[StringDigitCodeGenerator, IStringGenerator],
     )
 
-    uuid_generator = provide(
-        UUID4Generator,
-        scope=Scope.APP,
-        provides=AnyOf[UUID4Generator, IUUIDGenerator],
-    )
+    uuid4_generator = provide(UUID4Generator, scope=Scope.APP)
+    uuid7_generator = provide(UUID7Generator, scope=Scope.APP)
 
     taskiq_event_bus = provide(TaskiqEventBus, scope=Scope.APP, provides=AnyOf[TaskiqEventBus, IEventBus])
