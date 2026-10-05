@@ -16,7 +16,7 @@ from src.core.components.user.application.interface import (
     IUserRemover,
     IUserSaver,
 )
-from src.core.shared_kernel.application.interfaces.auth import IAuthTokenEditor, IAuthTokenReader, IAuthTokenSaver
+from src.core.shared_kernel.application.interfaces.token import IAuthTokenEditor, IAuthTokenReader, IAuthTokenSaver
 from src.core.shared_kernel.application.interfaces.event_bus import IEventBus
 from src.core.shared_kernel.application.interfaces.generator import IStringGenerator
 from src.core.shared_kernel.application.interfaces.localization import ITranslator

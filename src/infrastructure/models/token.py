@@ -36,7 +36,6 @@ class AuthToken(Base):
         sa.Enum(AuthTokenType, name='auth_token_type_enum', values_callable=get_enum_values),
         nullable=False,
     )
-    jti: Mapped[UUID] = mapped_column(sa.UUID, unique=True, index=True, nullable=False)
     token_hash: Mapped[str] = mapped_column(String(256), index=True)
     user_agent: Mapped[str | None] = mapped_column(String(512), nullable=True)
     ip_address: Mapped[str | None] = mapped_column(String(64), nullable=True)

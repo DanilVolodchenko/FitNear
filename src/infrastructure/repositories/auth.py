@@ -1,9 +1,10 @@
 from dataclasses import asdict
+from uuid import UUID
 
 from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from src.core.shared_kernel.application.interfaces.auth import IAuthTokenEditor, IAuthTokenReader, IAuthTokenSaver
+from src.core.shared_kernel.application.interfaces.token import IAuthTokenEditor, IAuthTokenReader, IAuthTokenSaver
 from src.core.shared_kernel.domain.entity import AuthTokenDM
 from src.infrastructure.models.token import AuthToken
 
@@ -17,7 +18,7 @@ class AuthTokenRepository(IAuthTokenSaver, IAuthTokenReader, IAuthTokenEditor):
 
         await self._session.execute(stmt)
 
-    async def get_by_id(self, ident: int) -> AuthTokenDM | None:
+    async def get_by_id(self, ident: UUID) -> AuthTokenDM | None:
         stmt = select(AuthToken).where(AuthToken.id == ident)
 
         result = await self._session.execute(stmt)
@@ -28,7 +29,7 @@ class AuthTokenRepository(IAuthTokenSaver, IAuthTokenReader, IAuthTokenEditor):
 
         return self._to_dm(auth_token)
 
-    async def deactivate_by_id(self, ident: int) -> None:
+    async def deactivate_by_id(self, ident: UUID) -> None:
         stmt = update(AuthToken).where(AuthToken.id == ident).values(is_active=False)
 
         await self._session.execute(stmt)

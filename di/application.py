@@ -12,7 +12,7 @@ from src.core.components.user.application.interface import (
     IUserSaver,
 )
 from src.core.components.user.application.service import ConfirmUserService, LoginUserService, RegisterUserService
-from src.core.shared_kernel.application.interfaces.auth import IAuthTokenSaver
+from src.core.shared_kernel.application.interfaces.token import IAuthTokenSaver
 from src.core.shared_kernel.application.interfaces.security import IHasher, IJWTToken
 from src.core.shared_kernel.application.interfaces.transaction import ITransactionManager
 from src.infrastructure.event_bus.taskiq import TaskiqEventBus

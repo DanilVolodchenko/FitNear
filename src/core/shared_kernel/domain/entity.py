@@ -10,7 +10,6 @@ from src.core.shared_kernel.domain.value_object import AuthTokenType
 class AuthTokenDM:
     id: UUID
     type: AuthTokenType
-    jti: UUID
     token_hash: str
     user_agent: str | None
     ip_address: str | None
@@ -28,7 +27,6 @@ class AuthTokenDM:
         cls,
         ident: UUID,
         token_type: AuthTokenType,
-        jti: UUID,
         token_hash: str,
         user_agent: str | None,
         ip_address: str | None,
@@ -39,7 +37,6 @@ class AuthTokenDM:
         return cls(
             id=ident,
             type=token_type,
-            jti=jti,
             token_hash=token_hash,
             user_agent=user_agent,
             ip_address=ip_address,

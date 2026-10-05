@@ -35,7 +35,7 @@ from src.core.exceptions.app_logic import (
     NotFoundError,
     TokenExpiredError,
 )
-from src.core.shared_kernel.application.interfaces.auth import IAuthTokenSaver
+from src.core.shared_kernel.application.interfaces.token import IAuthTokenSaver
 from src.core.shared_kernel.application.interfaces.event_bus import IEventBus
 from src.core.shared_kernel.application.interfaces.generator import IStringGenerator, IUUIDGenerator
 from src.core.shared_kernel.application.interfaces.security import IHasher, IJWTToken, IPwdHasher
@@ -249,7 +249,7 @@ class LoginUserService:
         issued_at: datetime,
     ) -> tuple[str, AuthTokenDM]:
 
-        jti = self._uuid4_generator.generate()
+        auth_token_id = self._uuid7_generator.generate()
 
         payload = {
             'sub': str(user_dm.id),
@@ -257,7 +257,7 @@ class LoginUserService:
             'type': token_type,
             'exp': expires_at,
             'iat': issued_at,
-            'jti': str(jti),
+            'jti': str(auth_token_id),
         }
 
         jwt_token = await self._jwt_token.encode(
@@ -266,12 +266,10 @@ class LoginUserService:
             algorithm=self._security_config.jwt_algorithm,
         )
 
-        auth_token_id = self._uuid7_generator.generate()
         auth_token_hash = await self._hasher.hash(jwt_token, self._security_config.hash_key)
         auth_token_dm = AuthTokenDM.create(
             ident=auth_token_id,
             token_type=token_type,
-            jti=jti,
             token_hash=auth_token_hash,
             user_agent=user_agent,
             ip_address=ip_address,
