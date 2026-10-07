@@ -14,10 +14,6 @@ class RegisterUserRequest(BaseAuthRequest):
     settings: RegisterSettingsRequest
 
 
-class LoginUserRequest(BaseAuthRequest):
-    password: str
-
-
 class RegisterSettingsRequest(BaseModel):
     language: Language
     theme: Theme
@@ -25,3 +21,12 @@ class RegisterSettingsRequest(BaseModel):
 
 class ConfirmUserRequest(BaseModel):
     confirmation_code: str
+
+
+class LoginUserRequest(BaseAuthRequest):
+    password: str
+
+
+class LogoutUserRequest(BaseModel):
+    access_token: str
+    refresh_token: str

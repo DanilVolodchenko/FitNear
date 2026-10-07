@@ -10,5 +10,5 @@ class RegisteredUserResponse(BaseModel):
 
 
 class LoginUserResponse(BaseModel):
-    access: str
+    access_token: str
     type: str = 'bearer'
