@@ -3,7 +3,8 @@ from datetime import UTC, datetime
 from typing import Self
 from uuid import UUID
 
-from src.core.components.user.domain.value_object import Language, RegistrationTokenType, Theme, UserRole
+from src.core.components.user.domain.value_object import Language, RegistrationTokenType, Theme
+from src.core.shared_kernel.domain.value_object import UserRole
 
 
 @dataclass(slots=True, frozen=True)

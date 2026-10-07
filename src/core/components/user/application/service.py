@@ -35,10 +35,11 @@ from src.core.exceptions.app_logic import (
     NotFoundError,
     TokenExpiredError,
 )
-from src.core.shared_kernel.application.interfaces.token import IAuthTokenSaver
+from src.core.shared_kernel.application.dto.security import JWTPayloadDTO
 from src.core.shared_kernel.application.interfaces.event_bus import IEventBus
 from src.core.shared_kernel.application.interfaces.generator import IStringGenerator, IUUIDGenerator
 from src.core.shared_kernel.application.interfaces.security import IHasher, IJWTToken, IPwdHasher
+from src.core.shared_kernel.application.interfaces.token import IAuthTokenSaver
 from src.core.shared_kernel.application.interfaces.transaction import ITransactionManager
 from src.core.shared_kernel.domain.entity import AuthTokenDM
 from src.core.shared_kernel.domain.value_object import AuthTokenType
@@ -236,7 +237,14 @@ class LoginUserService:
 
         await self._trx_manager.commit()
 
-        return JWTTokenDTO(access=access_token, refresh=refresh_token)
+        jwt_token = await self._jwt_token.decode(
+           access_token,
+            secret_key=self._security_config.jwt_secret_key,
+            algorithms=[self._security_config.jwt_algorithm],
+        )
+        jwt = JWTPayloadDTO.from_dict(jwt_token)
+
+        return JWTTokenDTO(access=str(jwt), refresh=refresh_token)
 
     async def _create_token(
         self,
@@ -251,17 +259,17 @@ class LoginUserService:
 
         auth_token_id = self._uuid7_generator.generate()
 
-        payload = {
-            'sub': str(user_dm.id),
-            'role': user_dm.role,
-            'type': token_type,
-            'exp': expires_at,
-            'iat': issued_at,
-            'jti': str(auth_token_id),
-        }
+        payload = JWTPayloadDTO(
+            jti=auth_token_id,
+            sub=user_dm.id,
+            role=user_dm.role,
+            type=token_type,
+            exp=expires_at,
+            iat=issued_at,
+        )
 
         jwt_token = await self._jwt_token.encode(
-            payload,
+            payload.to_dict(),
             secret_key=self._security_config.jwt_secret_key,
             algorithm=self._security_config.jwt_algorithm,
         )
