@@ -8,6 +8,7 @@ import jwt
 from argon2 import PasswordHasher
 from argon2.exceptions import Argon2Error, InvalidHashError
 
+from src.core.shared_kernel.application.exceptions.security import JWTError
 from src.core.shared_kernel.application.interfaces.security import IHasher, IJWTToken, IPwdHasher
 
 
@@ -16,7 +17,10 @@ class JWTToken(IJWTToken):
         return await asyncio.to_thread(jwt.encode, payload=payload, key=secret_key, algorithm=algorithm)
 
     async def decode(self, token: str, secret_key: str, algorithms: Sequence[str]) -> dict[str, Any]:
-        return await asyncio.to_thread(jwt.decode, jwt=token, key=secret_key, algorithms=algorithms)
+        try:
+            return await asyncio.to_thread(jwt.decode, jwt=token, key=secret_key, algorithms=algorithms)
+        except jwt.PyJWTError as exc:
+            raise JWTError(exc) from exc
 
 
 class Argon2PwdHasher(IPwdHasher):
