@@ -43,5 +43,11 @@ class LoginUserDTO(BaseUserDTO):
 
 @dataclass(frozen=True, slots=True)
 class JWTTokenDTO:
-    access: str
-    refresh: str
+    access_token: str
+    refresh_token: str
+
+
+@dataclass(frozen=True, slots=True)
+class LogoutUserDTO:
+    access_token: str | None
+    refresh_token: str | None

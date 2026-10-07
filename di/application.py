@@ -11,9 +11,14 @@ from src.core.components.user.application.interface import (
     IUserRemover,
     IUserSaver,
 )
-from src.core.components.user.application.service import ConfirmUserService, LoginUserService, RegisterUserService
-from src.core.shared_kernel.application.interfaces.token import IAuthTokenSaver
+from src.core.components.user.application.service import (
+    ConfirmUserService,
+    LoginUserService,
+    LogoutUserService,
+    RegisterUserService,
+)
 from src.core.shared_kernel.application.interfaces.security import IHasher, IJWTToken
+from src.core.shared_kernel.application.interfaces.token import IAuthTokenSaver, IAuthTokenEditor, IAuthTokenReader
 from src.core.shared_kernel.application.interfaces.transaction import ITransactionManager
 from src.infrastructure.event_bus.taskiq import TaskiqEventBus
 from src.infrastructure.generator import StringDigitCodeGenerator, UUID4Generator, UUID7Generator
@@ -94,5 +99,22 @@ class ApplicationProvider(Provider):
             jwt_token=jwt_token,
             hasher=hasher,
             auth_token_saver=auth_token_saver,
+            trx_manager=trx_manager,
+        )
+
+    @provide(scope=Scope.REQUEST)
+    async def get_logout_user_service(
+        self,
+        config: Config,
+        auth_token_reader: IAuthTokenReader,
+        auth_token_editor: IAuthTokenEditor,
+        jwt_token: IJWTToken,
+        trx_manager: ITransactionManager,
+    ) -> LogoutUserService:
+        return LogoutUserService(
+            security_config=config.security,
+            auth_token_reader=auth_token_reader,
+            auth_token_editor=auth_token_editor,
+            jwt_token=jwt_token,
             trx_manager=trx_manager,
         )

@@ -1,3 +1,4 @@
+import contextlib
 from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
@@ -12,6 +13,7 @@ from src.core.components.user.application.dto import (
     ConfirmUserDTO,
     JWTTokenDTO,
     LoginUserDTO,
+    LogoutUserDTO,
     RegisteredUserDTO,
     RegisterUserDTO,
 )
@@ -39,8 +41,9 @@ from src.core.shared_kernel.application.dto.security import JWTPayloadDTO
 from src.core.shared_kernel.application.interfaces.event_bus import IEventBus
 from src.core.shared_kernel.application.interfaces.generator import IStringGenerator, IUUIDGenerator
 from src.core.shared_kernel.application.interfaces.security import IHasher, IJWTToken, IPwdHasher
-from src.core.shared_kernel.application.interfaces.token import IAuthTokenSaver
+from src.core.shared_kernel.application.interfaces.token import IAuthTokenEditor, IAuthTokenReader, IAuthTokenSaver
 from src.core.shared_kernel.application.interfaces.transaction import ITransactionManager
+from src.core.shared_kernel.application.exceptions.security import JWTError
 from src.core.shared_kernel.domain.entity import AuthTokenDM
 from src.core.shared_kernel.domain.value_object import AuthTokenType
 from src.infrastructure.models.value_object import UserRole
@@ -237,14 +240,7 @@ class LoginUserService:
 
         await self._trx_manager.commit()
 
-        jwt_token = await self._jwt_token.decode(
-           access_token,
-            secret_key=self._security_config.jwt_secret_key,
-            algorithms=[self._security_config.jwt_algorithm],
-        )
-        jwt = JWTPayloadDTO.from_dict(jwt_token)
-
-        return JWTTokenDTO(access=str(jwt), refresh=refresh_token)
+        return JWTTokenDTO(access_token=access_token, refresh_token=refresh_token)
 
     async def _create_token(
         self,
@@ -290,4 +286,43 @@ class LoginUserService:
 
 
 class LogoutUserService:
-    async def __call__(self) -> None: ...
+    def __init__(
+        self,
+        security_config: SecurityConfig,
+        auth_token_reader: IAuthTokenReader,
+        auth_token_editor: IAuthTokenEditor,
+        jwt_token: IJWTToken,
+        trx_manager: ITransactionManager,
+    ) -> None:
+        self._security_config = security_config
+        self._auth_token_reader = auth_token_reader
+        self._auth_token_editor = auth_token_editor
+        self._jwt_token = jwt_token
+        self._trx_manager = trx_manager
+
+    async def __call__(self, logout_user_dto: LogoutUserDTO) -> None:
+        if logout_user_dto.access_token:
+            with contextlib.suppress(JWTError):
+                await self._deactivate_token(logout_user_dto.access_token)
+
+        if logout_user_dto.refresh_token:
+            with contextlib.suppress(JWTError):
+                await self._deactivate_token(logout_user_dto.refresh_token)
+
+        await self._trx_manager.commit()
+
+    async def _deactivate_token(self, token: str) -> None:
+        """Decode and deactivate token."""
+
+        raw_payload = await self._jwt_token.decode(
+            token,
+            self._security_config.jwt_secret_key,
+            [self._security_config.jwt_algorithm],
+        )
+
+        jwt_payload = JWTPayloadDTO.from_dict(raw_payload)
+
+        auth_token_dm = await self._auth_token_reader.get_by_id(jwt_payload.jti)
+
+        if auth_token_dm and auth_token_dm.is_active:
+            await self._auth_token_editor.deactivate_by_id(jwt_payload.jti)
