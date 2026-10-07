@@ -38,7 +38,6 @@ class AuthTokenRepository(IAuthTokenSaver, IAuthTokenReader, IAuthTokenEditor):
         return AuthTokenDM(
             id=auth_token.id,
             type=auth_token.type,
-            jti=auth_token.jti,
             token_hash=auth_token.token_hash,
             user_agent=auth_token.user_agent,
             ip_address=auth_token.ip_address,
