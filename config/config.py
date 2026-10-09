@@ -2,7 +2,7 @@ from enum import StrEnum
 from typing import Any, Self
 
 from dotenv import dotenv_values
-from pydantic import BaseModel, EmailStr, Field, PostgresDsn, RedisDsn, model_validator
+from pydantic import BaseModel, EmailStr, Field, PostgresDsn, RedisDsn, field_validator, model_validator
 
 from . import config_path
 
@@ -72,9 +72,15 @@ class RedisConfig(BaseModel):
 
 
 class SecurityConfig(BaseModel):
-    jwt_algorithm: str = Field('HS256', alias='SECURITY_JWT_ALGORITHM')
+    jwt_encode_algorithm: str = Field('HS256', alias='SECURITY_ENCODE_JWT_ALGORITHM')
+    jwt_decode_algorithms: list[str] = Field(['HS256'], alias='SECURITY_DECODE_JWT_ALGORITHMS')
     jwt_secret_key: str = Field(alias='SECURITY_JWT_SECRET_KEY')
     hash_key: str = Field(alias='SECURITY_HASH_KEY')
+
+    @field_validator('jwt_decode_algorithms', mode='before')
+    @classmethod
+    def parse_algorithms(cls, algorithms: str) -> list[str]:
+        return algorithms.lstrip('[').rstrip(']').split(', ')
 
 
 class SMTPConfig(BaseModel):
