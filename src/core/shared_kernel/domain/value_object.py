@@ -7,6 +7,6 @@ class UserRole(StrEnum):
     ADMIN = 'admin'
 
 
-class AuthTokenType(StrEnum):
+class JWTTokenType(StrEnum):
     ACCESS = 'access'
     REFRESH = 'refresh'

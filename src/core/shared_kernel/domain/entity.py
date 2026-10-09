@@ -3,13 +3,10 @@ from datetime import UTC, datetime
 from typing import Self
 from uuid import UUID
 
-from src.core.shared_kernel.domain.value_object import AuthTokenType
-
 
 @dataclasses.dataclass(frozen=True, slots=True)
-class AuthTokenDM:
+class RefreshTokenDM:
     id: UUID
-    type: AuthTokenType
     token_hash: str
     user_agent: str | None
     ip_address: str | None
@@ -26,7 +23,6 @@ class AuthTokenDM:
     def create(
         cls,
         ident: UUID,
-        token_type: AuthTokenType,
         token_hash: str,
         user_agent: str | None,
         ip_address: str | None,
@@ -36,7 +32,6 @@ class AuthTokenDM:
     ) -> Self:
         return cls(
             id=ident,
-            type=token_type,
             token_hash=token_hash,
             user_agent=user_agent,
             ip_address=ip_address,

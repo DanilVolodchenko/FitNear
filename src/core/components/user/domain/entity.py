@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from typing import Self
 from uuid import UUID
 
-from src.core.components.user.domain.value_object import Language, RegistrationTokenType, Theme
+from src.core.components.user.domain.value_object import Language, ConfirmationCodeType, Theme
 from src.core.shared_kernel.domain.value_object import UserRole
 
 
@@ -72,10 +72,10 @@ class PermissionDM:
 
 
 @dataclass(slots=True, frozen=True)
-class RegistrationTokenDM:
+class ConfirmationCodeDM:
     id: UUID
-    token_hash: str
-    type: RegistrationTokenType
+    code_hash: str
+    type: ConfirmationCodeType
     is_active: bool
     expires_at: datetime
     created_at: datetime
@@ -86,15 +86,15 @@ class RegistrationTokenDM:
     def create(
         cls,
         ident: UUID,
-        token_hash: str,
-        token_type: RegistrationTokenType,
+        code_hash: str,
+        code_type: ConfirmationCodeType,
         expires_at: datetime,
         user_id: UUID,
     ) -> Self:
         return cls(
             id=ident,
-            token_hash=token_hash,
-            type=token_type,
+            code_hash=code_hash,
+            type=code_type,
             is_active=True,
             expires_at=expires_at,
             created_at=datetime.now(tz=UTC),
