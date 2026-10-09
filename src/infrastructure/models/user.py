@@ -5,9 +5,10 @@ import sqlalchemy as sa
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Table, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from src.core.components.user.domain.value_object import Language, Theme
+from src.core.shared_kernel.domain.value_object import UserRole
 from src.infrastructure.models.base import Base
 from src.infrastructure.models.utils import get_enum_values
-from src.infrastructure.models.value_object import Language, Theme, UserRole
 
 users_roles = Table(
     'users_roles',
@@ -91,7 +92,7 @@ class Settings(Base):
     )
     theme: Mapped[Theme] = mapped_column(
         sa.Enum(Theme, name='settings_theme_enum', values_callable=get_enum_values),
-        default=Theme.SYSTEM,
+        default=Theme.WHITE,
         nullable=False,
     )
 

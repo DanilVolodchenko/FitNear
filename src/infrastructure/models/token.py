@@ -5,19 +5,19 @@ import sqlalchemy as sa
 from sqlalchemy import DateTime, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
+from src.core.components.user.domain.value_object import ConfirmationCodeType
 from src.infrastructure.models.base import Base
 from src.infrastructure.models.utils import get_enum_values
-from src.infrastructure.models.value_object import AuthTokenType, RegistrationTokenType
 
 
-class RegistrationToken(Base):
-    __tablename__ = 'registration_tokens'
+class ConfirmationCode(Base):
+    __tablename__ = 'confirmation_codes'
 
     id: Mapped[UUID] = mapped_column(sa.UUID, primary_key=True)
-    token_hash: Mapped[str] = mapped_column(index=True)
+    code_hash: Mapped[str] = mapped_column(index=True)
     used_at: Mapped[datetime | None] = mapped_column(default=None, nullable=True)
-    type: Mapped[RegistrationTokenType] = mapped_column(
-        sa.Enum(RegistrationTokenType, name='registration_token_type_enum', values_callable=get_enum_values),
+    type: Mapped[ConfirmationCodeType] = mapped_column(
+        sa.Enum(ConfirmationCodeType, name='confirmation_code_type_enum', values_callable=get_enum_values),
         nullable=False,
     )
     attempts: Mapped[int] = mapped_column(default=0, nullable=False)
@@ -28,14 +28,10 @@ class RegistrationToken(Base):
     user_id: Mapped[UUID] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'))
 
 
-class AuthToken(Base):
-    __tablename__ = 'auth_tokens'
+class RefreshToken(Base):
+    __tablename__ = 'refresh_tokens'
 
     id: Mapped[UUID] = mapped_column(sa.UUID, primary_key=True)
-    type: Mapped[AuthTokenType] = mapped_column(
-        sa.Enum(AuthTokenType, name='auth_token_type_enum', values_callable=get_enum_values),
-        nullable=False,
-    )
     token_hash: Mapped[str] = mapped_column(String(256), index=True)
     user_agent: Mapped[str | None] = mapped_column(String(512), nullable=True)
     ip_address: Mapped[str | None] = mapped_column(String(64), nullable=True)
