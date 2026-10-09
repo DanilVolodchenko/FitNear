@@ -7,28 +7,32 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from config import Config
 from src.core.components.user.application.interface import (
-    IRegistrationTokenEditor,
-    IRegistrationTokenReader,
-    IRegistrationTokenSaver,
+    IConfirmationCodeEditor,
+    IConfirmationCodeReader,
+    IConfirmationCodeSaver,
     ISettingsSaver,
     IUserEditor,
     IUserReader,
     IUserRemover,
     IUserSaver,
 )
-from src.core.shared_kernel.application.interfaces.token import IAuthTokenEditor, IAuthTokenReader, IAuthTokenSaver
 from src.core.shared_kernel.application.interfaces.event_bus import IEventBus
 from src.core.shared_kernel.application.interfaces.generator import IStringGenerator
 from src.core.shared_kernel.application.interfaces.localization import ITranslator
 from src.core.shared_kernel.application.interfaces.log import ILogger
 from src.core.shared_kernel.application.interfaces.security import IHasher, IJWTToken, IPwdHasher
+from src.core.shared_kernel.application.interfaces.token import (
+    IRefreshTokenEditor,
+    IRefreshTokenReader,
+    IRefreshTokenSaver,
+)
 from src.core.shared_kernel.application.interfaces.transaction import ITransactionManager
 from src.infrastructure.communication import SMTPEmailSender
 from src.infrastructure.event_bus.taskiq import TaskiqEventBus
 from src.infrastructure.generator import StringDigitCodeGenerator, UUID4Generator, UUID7Generator
 from src.infrastructure.localization import Translator
-from src.infrastructure.repositories.auth import AuthTokenRepository
-from src.infrastructure.repositories.token import RegistrationTokenRepository
+from src.infrastructure.repositories.auth import RefreshTokenRepository
+from src.infrastructure.repositories.token import ConfirmationCodeRepository
 from src.infrastructure.repositories.user import SettingsRepository, UserRepository
 from src.infrastructure.resources.database import new_session_maker
 from src.infrastructure.security import Argon2PwdHasher, JWTToken, SHA256Hasher
@@ -67,19 +71,19 @@ class InfrastructureProvider(Provider):
     )
 
     registration_token_repository = provide(
-        RegistrationTokenRepository,
+        ConfirmationCodeRepository,
         scope=Scope.REQUEST,
         provides=AnyOf[
-            RegistrationTokenRepository,
-            IRegistrationTokenReader,
-            IRegistrationTokenSaver,
-            IRegistrationTokenEditor,
+            ConfirmationCodeRepository,
+            IConfirmationCodeSaver,
+            IConfirmationCodeReader,
+            IConfirmationCodeEditor,
         ],
     )
-    auth_token_repository = provide(
-        AuthTokenRepository,
+    refresh_token_repository = provide(
+        RefreshTokenRepository,
         scope=Scope.REQUEST,
-        provides=AnyOf[AuthTokenRepository, IAuthTokenSaver, IAuthTokenEditor, IAuthTokenReader],
+        provides=AnyOf[RefreshTokenRepository, IRefreshTokenSaver, IRefreshTokenEditor, IRefreshTokenReader],
     )
 
     jwt_token = provide(JWTToken, scope=Scope.APP, provides=AnyOf[JWTToken, IJWTToken])

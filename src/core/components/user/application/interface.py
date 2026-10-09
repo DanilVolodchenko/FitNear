@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from uuid import UUID
 
-from src.core.components.user.domain.entity import RegistrationTokenDM, SettingsDM, UserDM
+from src.core.components.user.domain.entity import ConfirmationCodeDM, SettingsDM, UserDM
 
 
 class IUserSaver(ABC):
@@ -38,23 +38,23 @@ class ISettingsSaver(ABC):
         """Create user settings."""
 
 
-class IRegistrationTokenSaver(ABC):
+class IConfirmationCodeSaver(ABC):
     @abstractmethod
-    async def save(self, token_dm: RegistrationTokenDM) -> None:
-        """Save registration token."""
+    async def save(self, confirmation_code_dm: ConfirmationCodeDM) -> None:
+        """Save confirmation code."""
 
 
-class IRegistrationTokenReader(ABC):
+class IConfirmationCodeReader(ABC):
     @abstractmethod
-    async def get_by_token_hash(self, token_hash: str) -> RegistrationTokenDM | None:
-        """Get token by token_hash."""
+    async def get_by_token_hash(self, token_hash: str) -> ConfirmationCodeDM | None:
+        """Get confirmation code by token_hash."""
 
     @abstractmethod
-    async def get_by_id(self, ident: UUID) -> RegistrationTokenDM | None:
-        """Get token by id."""
+    async def get_by_id(self, ident: UUID) -> ConfirmationCodeDM | None:
+        """Get confirmation code by id."""
 
 
-class IRegistrationTokenEditor(ABC):
+class IConfirmationCodeEditor(ABC):
     @abstractmethod
     async def deactivate(self, ident: UUID) -> None:
-        """Deactivate token."""
+        """Deactivate confirmation code."""

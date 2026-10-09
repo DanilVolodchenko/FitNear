@@ -5,25 +5,25 @@ from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy.sql import insert, select, update
 
 from src.core.components.user.application.interface import (
-    IRegistrationTokenEditor,
-    IRegistrationTokenReader,
-    IRegistrationTokenSaver,
+    IConfirmationCodeEditor,
+    IConfirmationCodeReader,
+    IConfirmationCodeSaver,
 )
-from src.core.components.user.domain.entity import RegistrationTokenDM
-from src.infrastructure.models.token import RegistrationToken
+from src.core.components.user.domain.entity import ConfirmationCodeDM
+from src.infrastructure.models.token import ConfirmationCode
 
 
-class RegistrationTokenRepository(IRegistrationTokenSaver, IRegistrationTokenReader, IRegistrationTokenEditor):
+class ConfirmationCodeRepository(IConfirmationCodeSaver, IConfirmationCodeReader, IConfirmationCodeEditor):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def save(self, token_dm: RegistrationTokenDM) -> None:
-        stmt = insert(RegistrationToken).values(**asdict(token_dm))
+    async def save(self, confirmation_code_dm: ConfirmationCodeDM) -> None:
+        stmt = insert(ConfirmationCode).values(**asdict(confirmation_code_dm))
 
         await self._session.execute(stmt)
 
-    async def get_by_token_hash(self, token_hash: str) -> RegistrationTokenDM | None:
-        stmt = select(RegistrationToken).where(RegistrationToken.token_hash == token_hash)
+    async def get_by_token_hash(self, token_hash: str) -> ConfirmationCodeDM | None:
+        stmt = select(ConfirmationCode).where(ConfirmationCode.token_hash == token_hash)
 
         result = await self._session.execute(stmt)
         registration_token = result.scalar_one_or_none()
@@ -33,8 +33,8 @@ class RegistrationTokenRepository(IRegistrationTokenSaver, IRegistrationTokenRea
 
         return self._to_dm(registration_token)
 
-    async def get_by_id(self, ident: UUID) -> RegistrationTokenDM | None:
-        stmt = select(RegistrationToken).where(RegistrationToken.id == ident)
+    async def get_by_id(self, ident: UUID) -> ConfirmationCodeDM | None:
+        stmt = select(ConfirmationCode).where(ConfirmationCode.id == ident)
 
         result = await self._session.execute(stmt)
         registration_token = result.scalar_one_or_none()
@@ -45,15 +45,15 @@ class RegistrationTokenRepository(IRegistrationTokenSaver, IRegistrationTokenRea
         return self._to_dm(registration_token)
 
     async def deactivate(self, ident: UUID) -> None:
-        stmt = update(RegistrationToken).where(RegistrationToken.id == ident).values(is_active=False)
+        stmt = update(ConfirmationCode).where(ConfirmationCode.id == ident).values(is_active=False)
 
         await self._session.execute(stmt)
 
-    def _to_dm(self, registration_token: RegistrationToken) -> RegistrationTokenDM:
-        return RegistrationTokenDM(
+    def _to_dm(self, registration_token: ConfirmationCode) -> ConfirmationCodeDM:
+        return ConfirmationCodeDM(
             id=registration_token.id,
             user_id=registration_token.user_id,
-            token_hash=registration_token.token_hash,
+            code_hash=registration_token.code_hash,
             type=registration_token.type,
             is_active=registration_token.is_active,
             expires_at=registration_token.expires_at,

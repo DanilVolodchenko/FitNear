@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from typing import Any, Self
 from uuid import UUID
 
-from src.core.shared_kernel.domain.value_object import AuthTokenType, UserRole
+from src.core.shared_kernel.domain.value_object import JWTTokenType, UserRole
 
 
 @dataclasses.dataclass(frozen=True, slots=True)
@@ -11,7 +11,7 @@ class JWTPayloadDTO:
     jti: UUID
     sub: UUID
     role: UserRole
-    type: AuthTokenType
+    type: JWTTokenType
     exp: datetime
     iat: datetime
 
@@ -31,7 +31,7 @@ class JWTPayloadDTO:
             jti=UUID(payload['jti']),
             sub=UUID(payload['sub']),
             role=UserRole(payload['role']),
-            type=AuthTokenType(payload['type']),
+            type=JWTTokenType(payload['type']),
             exp=datetime.fromtimestamp(payload['exp'], tz=UTC),
             iat=datetime.fromtimestamp(payload['iat'], tz=UTC),
         )

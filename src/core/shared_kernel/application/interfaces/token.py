@@ -1,22 +1,22 @@
 from abc import ABC, abstractmethod
 from uuid import UUID
 
-from src.core.shared_kernel.domain.entity import AuthTokenDM
+from src.core.shared_kernel.domain.entity import RefreshTokenDM
 
 
-class IAuthTokenSaver(ABC):
+class IRefreshTokenSaver(ABC):
     @abstractmethod
-    async def add(self, auth_token_dm: AuthTokenDM) -> None:
-        """Create auth token."""
+    async def add(self, refresh_token_dm: RefreshTokenDM) -> None:
+        """Create refresh token."""
 
 
-class IAuthTokenReader(ABC):
+class IRefreshTokenReader(ABC):
     @abstractmethod
-    async def get_by_id(self, ident: UUID) -> AuthTokenDM | None:
-        """Returns auth token domain model by ident."""
+    async def get_by_id(self, ident: UUID) -> RefreshTokenDM | None:
+        """Returns refresh token by ident."""
 
 
-class IAuthTokenEditor(ABC):
+class IRefreshTokenEditor(ABC):
     @abstractmethod
     async def deactivate_by_id(self, ident: UUID) -> None:
         """Deactivate token by ident."""

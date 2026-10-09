@@ -3,6 +3,7 @@ from src.core.shared_kernel.application.interfaces.token import IAuthTokenReader
 from src.core.shared_kernel.application.interfaces.security import IJWTToken
 from src.core.shared_kernel.application.dto.security import JWTPayloadDTO
 from config import SecurityConfig
+from src.core.shared_kernel.application.exceptions.auth import AuthorizationError
 
 class AuthorizationService:
     def __init__(
@@ -22,3 +23,8 @@ class AuthorizationService:
         jwt_payload = JWTPayloadDTO(**raw_payload)
 
         auth_token = await self._auth_token_reader.get_by_id(jwt_payload.jti)
+
+        if not auth_token or not auth_token.is_active:
+            raise AuthorizationError('Invalid token')
+
+
