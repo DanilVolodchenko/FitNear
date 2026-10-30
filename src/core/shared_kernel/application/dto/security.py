@@ -6,7 +6,7 @@ from uuid import UUID
 from src.core.shared_kernel.domain.value_object import JWTTokenType, UserRole
 
 
-@dataclasses.dataclass(frozen=True, slots=True)
+@dataclasses.dataclass(frozen=True)
 class JWTPayloadDTO:
     jti: UUID
     sub: UUID

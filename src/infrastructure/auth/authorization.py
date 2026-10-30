@@ -1,30 +1,49 @@
-from src.core.components.user.domain.entity import UserDM
-from src.core.shared_kernel.application.interfaces.token import IAuthTokenReader
-from src.core.shared_kernel.application.interfaces.security import IJWTToken
-from src.core.shared_kernel.application.dto.security import JWTPayloadDTO
+from datetime import UTC, datetime
+
+import jwt
+
 from config import SecurityConfig
+from src.core.components.user.application.interface import IUserReader
+from src.core.components.user.domain.entity import UserDM
+from src.core.shared_kernel.application.dto.security import JWTPayloadDTO
 from src.core.shared_kernel.application.exceptions.auth import AuthorizationError
+from src.core.shared_kernel.application.interfaces.security import IJWTToken
+
 
 class AuthorizationService:
     def __init__(
         self,
         security_config: SecurityConfig,
         jwt_token: IJWTToken,
-        auth_token_reader: IAuthTokenReader,
+        user_reader: IUserReader,
     ) -> None:
         self._security_config = security_config
         self._jwt_token = jwt_token
-        self._auth_token_reader = auth_token_reader
+        self._user_reader = user_reader
 
     async def get_user(self, access_token: str) -> UserDM:
-        raw_payload = await self._jwt_token.decode(
-            access_token, self._security_config.jwt_secret_key, self._security_config.jwt_algorithm
-        )
-        jwt_payload = JWTPayloadDTO(**raw_payload)
+        jwt_payload = await self.validate_jwt_token(access_token)
 
-        auth_token = await self._auth_token_reader.get_by_id(jwt_payload.jti)
+        user = await self._user_reader.get_by_id(jwt_payload.sub)
 
-        if not auth_token or not auth_token.is_active:
+        if not user:
+            raise AuthorizationError('User not found')
+
+        return user
+
+    async def validate_jwt_token(self, jwt_token: str) -> JWTPayloadDTO:
+        try:
+            raw_payload = await self._jwt_token.decode(
+                jwt_token,
+                self._security_config.jwt_secret_key,
+                self._security_config.jwt_decode_algorithms,
+            )
+        except jwt.PyJWTError:
             raise AuthorizationError('Invalid token')
 
+        jwt_payload = JWTPayloadDTO.from_dict(raw_payload)
 
+        if jwt_payload.exp < datetime.now(tz=UTC):
+            raise AuthorizationError('Token was expired')
+
+        return jwt_payload
